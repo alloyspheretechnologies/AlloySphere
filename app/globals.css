@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  
+  /* Monochromatic Premium Scale */
+  --color-primary: #ffffff;
+  --color-on-primary: #000000;
+  
+  --color-secondary: #a1a1aa;
+  --color-on-secondary: #000000;
+  
+  --color-tertiary: #d4d4d8;
+  --color-on-tertiary: #000000;
+
+  --color-surface: #0a0a0a;
+  --color-on-surface: #ffffff;
+  --color-surface-variant: #171717;
+  --color-on-surface-variant: #a1a1aa;
+  
+  --color-surface-container-lowest: #000000;
+  --color-surface-container-low: #0a0a0a;
+  --color-surface-container: #111111;
+  --color-surface-container-high: #171717;
+  --color-surface-container-highest: #262626;
+
+  /* Fonts */
+  --font-headline-lg: "Inter", sans-serif;
+  --font-headline-md: "Inter", sans-serif;
+  --font-headline-sm: "Inter", sans-serif;
+  --font-display-lg: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-body-sm: "Inter", sans-serif;
+  --font-label-md: "Geist", sans-serif;
+  
+  /* Radii - Crisper edges for premium feel */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+
+  --color-border: #262626;
+  --color-input: #171717;
+  --color-ring: #ffffff;
+}
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Removed purple neon-glow, replaced with subtle white ambient glow */
+  .neon-glow {
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+  }
+
+  .avatar-glow {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  }
+
+  /* Crisp lift animation, no purple */
+  .holographic-lift {
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .holographic-lift:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(17, 17, 17, 0.8);
+  }
+
+  .btn-glow {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .btn-glow:hover {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+  }
+}
+
+.pulse-core {
+  animation: core-pulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes core-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+.perspective-tilt {
+  perspective: 1500px;
+}
+.tilt-container {
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
