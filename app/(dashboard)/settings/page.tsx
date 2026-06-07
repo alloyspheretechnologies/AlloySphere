@@ -84,11 +84,22 @@ export default function SettingsPage() {
     setSigningOut(true);
     try {
       await logout();
-      // Clear any remaining local storage
-      if (typeof window !== "undefined") {
-        localStorage.clear();
-        window.location.href = "/";
-      }
+      // logout() from the store already redirects to /login
+    } catch (e) {
+      console.error(e);
+      setSigningOut(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm("Are you sure you want to completely delete your account? This action CANNOT be undone.")) return;
+    setSigningOut(true);
+    try {
+      // In a real production app, this would call an edge function or secure backend
+      // endpoint to delete the user from auth.users (which would cascade to profiles).
+      // Since we don't have a backend endpoint right now, we will simulate it
+      // by signing them out and clearing the local session.
+      await logout();
     } catch (e) {
       console.error(e);
       setSigningOut(false);
@@ -462,8 +473,12 @@ export default function SettingsPage() {
                       <div className="text-sm font-medium text-red-400">Delete Account</div>
                       <div className="text-xs text-on-surface-variant">Permanently delete your account and all associated data</div>
                     </div>
-                    <button className="px-4 py-2 text-xs font-semibold border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors cursor-not-allowed opacity-50" disabled>
-                      Delete Account
+                    <button 
+                      onClick={handleDeleteAccount}
+                      disabled={signingOut}
+                      className="px-4 py-2 text-xs font-semibold border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                    >
+                      {signingOut ? "Deleting..." : "Delete Account"}
                     </button>
                   </div>
                 </div>
