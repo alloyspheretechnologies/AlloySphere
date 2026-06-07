@@ -30,6 +30,7 @@ export function SideNav() {
     ]},
     { section: "Management", items: [
       { icon: "group", label: "Team", href: "/workspace/team" },
+      { icon: "chat", label: "Discussions", href: "/workspace/discussions" },
       { icon: "folder", label: "Documents", href: "/workspace/documents" },
     ]},
     { section: "Network", items: [
