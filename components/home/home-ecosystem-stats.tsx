@@ -18,15 +18,13 @@ interface EcosystemStats {
 export default function HomeEcosystemStats({ stats }: { stats: EcosystemStats }) {
   const items = [
     { label: "Startups", value: stats.totalStartups, icon: "rocket_launch", gradient: "from-white/10 to-white/5" },
-    { label: "Members", value: stats.totalMembers, icon: "group", gradient: "from-white/10 to-white/5" },
     { label: "Investors", value: stats.totalInvestors, icon: "account_balance", gradient: "from-white/10 to-white/5" },
-    { label: "Projects", value: stats.activeProjects, icon: "folder_open", gradient: "from-white/10 to-white/5" },
     { label: "Opportunities", value: stats.totalOpportunities, icon: "work", gradient: "from-white/10 to-white/5" },
     { label: "Applications", value: stats.applicationsThisWeek, icon: "description", gradient: "from-white/10 to-white/5" },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
       {items.map((item) => (
         <div key={item.label} className="glass-panel p-4 rounded-xl border border-white/10 hover:border-white/20 transition-all group">
           <div className="flex items-center gap-2 mb-2">

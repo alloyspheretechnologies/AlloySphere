@@ -43,8 +43,8 @@ export default async function StartupRedirectPage() {
     if (startupInfo && startupInfo.slug) {
       redirect(`/startup/${startupInfo.slug}`);
     } else {
-      // If no startup found, redirect to home
-      redirect("/home");
+      // If no startup found, redirect to create startup
+      redirect("/startup/create");
     }
   }
 }
