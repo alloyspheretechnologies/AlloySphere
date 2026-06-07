@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useWorkspaceStore } from "@/lib/store/useWorkspaceStore";
+import { documentService } from "@/lib/services/document.service";
+import { profileService } from "@/lib/services/profile.service";
 
 interface ChatMessage {
   id: string;
@@ -17,19 +20,23 @@ interface SharedDoc {
   sharedBy: string;
   time: string;
   type: string;
+  url?: string;
+  isUploading?: boolean;
 }
 
 export function ConferenceChat() {
   const [activeTab, setActiveTab] = useState<"chat" | "docs">("chat");
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { workspace } = useWorkspaceStore();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [docs, setDocs] = useState<SharedDoc[]>([]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
+  }, [messages, docs]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -44,18 +51,58 @@ export function ConferenceChat() {
     setInput("");
   };
 
-  const handleDocUpload = () => {
-    const name = prompt("Enter document name (e.g. 'Sprint Plan.pdf'):");
-    if (!name) return;
-    setDocs((prev) => [{ id: Date.now().toString(), name, sharedBy: "You", time: "now", type: name.split(".").pop() || "file" }, ...prev]);
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !workspace) return;
+
+    // Optimistic UI
+    const tempId = Date.now().toString();
+    setDocs((prev) => [
+      { id: tempId, name: file.name, sharedBy: "You", time: "Uploading...", type: file.name.split(".").pop() || "file", isUploading: true },
+      ...prev,
+    ]);
+
+    try {
+      const { data: profile } = await profileService.getCurrentProfile();
+      const { data, error } = await documentService.uploadDocument(workspace.id, file, undefined, profile?.id);
+
+      if (error || !data) {
+        throw new Error(error?.message || "Upload failed");
+      }
+
+      setDocs((prev) => prev.map(d => d.id === tempId ? {
+        id: data.id,
+        name: data.name,
+        sharedBy: "You",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        type: file.name.split(".").pop() || "file",
+        url: data.file_url,
+        isUploading: false
+      } : d));
+    } catch (e) {
+      console.error(e);
+      // Remove failed upload
+      setDocs((prev) => prev.filter(d => d.id !== tempId));
+      alert("Failed to upload document");
+    }
+    
+    // Reset file input
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleDownload = async (doc: SharedDoc) => {
+    if (!doc.url) return;
+    const { url } = await documentService.getDocumentUrl(doc.url);
+    if (url) window.open(url, '_blank');
   };
 
   const getDocIcon = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case "pdf": return "picture_as_pdf";
       case "figma": case "fig": return "palette";
       case "md": case "markdown": return "description";
       case "zip": return "folder_zip";
+      case "png": case "jpg": case "jpeg": case "svg": return "image";
       default: return "insert_drive_file";
     }
   };
@@ -63,7 +110,7 @@ export function ConferenceChat() {
   return (
     <div className="flex flex-col h-full">
       {/* Tab Switcher */}
-      <div className="flex border-b border-white/10">
+      <div className="flex border-b border-white/10 shrink-0">
         <button onClick={() => setActiveTab("chat")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center transition-colors relative ${activeTab === "chat" ? "text-white" : "text-white/40 hover:text-white/60"}`}>
           <span className="flex items-center justify-center gap-1.5">
             <span className="material-symbols-outlined text-[16px]">chat</span>
@@ -74,7 +121,7 @@ export function ConferenceChat() {
         <button onClick={() => setActiveTab("docs")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center transition-colors relative ${activeTab === "docs" ? "text-white" : "text-white/40 hover:text-white/60"}`}>
           <span className="flex items-center justify-center gap-1.5">
             <span className="material-symbols-outlined text-[16px]">folder_shared</span>
-            Shared Files
+            Files
           </span>
           {activeTab === "docs" && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400" />}
         </button>
@@ -104,7 +151,7 @@ export function ConferenceChat() {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-white/10">
+            <div className="p-3 border-t border-white/10 shrink-0">
               <div className="flex gap-2">
                 <input
                   value={input}
@@ -124,16 +171,22 @@ export function ConferenceChat() {
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
               {docs.length > 0 ? docs.map((doc) => (
                 <div key={doc.id} className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer group">
-                  <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0 relative overflow-hidden">
+                    {doc.isUploading && <div className="absolute inset-0 bg-white/10 animate-pulse" />}
                     <span className="material-symbols-outlined text-[18px]">{getDocIcon(doc.type)}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-semibold text-white truncate">{doc.name}</div>
                     <div className="text-[10px] text-white/40">{doc.sharedBy} • {doc.time}</div>
                   </div>
-                  <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded-lg">
-                    <span className="material-symbols-outlined text-[16px] text-white/50">download</span>
-                  </button>
+                  {!doc.isUploading && (
+                    <button onClick={() => handleDownload(doc)} className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded-lg">
+                      <span className="material-symbols-outlined text-[16px] text-white/50">download</span>
+                    </button>
+                  )}
+                  {doc.isUploading && (
+                    <div className="w-4 h-4 border-2 border-indigo-500/50 border-t-indigo-400 rounded-full animate-spin mr-2" />
+                  )}
                 </div>
               )) : (
                 <div className="flex flex-col items-center justify-center h-full text-center py-10">
@@ -144,10 +197,20 @@ export function ConferenceChat() {
             </div>
 
             {/* Upload */}
-            <div className="p-3 border-t border-white/10">
-              <button onClick={handleDocUpload} className="w-full py-2.5 border border-dashed border-white/15 rounded-xl text-xs font-semibold text-white/40 hover:text-white/70 hover:border-white/30 transition-colors flex items-center justify-center gap-2">
+            <div className="p-3 border-t border-white/10 shrink-0">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleDocUpload} 
+                className="hidden" 
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()} 
+                disabled={!workspace}
+                className="w-full py-2.5 border border-dashed border-white/15 rounded-xl text-xs font-semibold text-white/40 hover:text-white/70 hover:border-white/30 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <span className="material-symbols-outlined text-[16px]">upload_file</span>
-                Share a Document
+                {workspace ? "Share a Document" : "Loading workspace..."}
               </button>
             </div>
           </motion.div>

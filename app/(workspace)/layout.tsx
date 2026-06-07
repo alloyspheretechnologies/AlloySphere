@@ -40,7 +40,6 @@ export default function WorkspaceGroupLayout({ children }: { children: React.Rea
 
   const navItems = [
     { label: "Overview", href: "/workspace", icon: "grid_view" },
-    { label: "Projects", href: "/workspace/projects", icon: "folder" },
     { label: "Tasks", href: "/workspace/tasks", icon: "task_alt" },
     { label: "Discussions", href: "/workspace/discussions", icon: "forum" },
     { label: "Documents", href: "/workspace/documents", icon: "description" },

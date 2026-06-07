@@ -22,17 +22,6 @@ export function SideNav() {
       { icon: "rocket_launch", label: "Startup", href: "/startup" },
       { icon: "grid_view", label: "Workspace", href: "/workspace", isFill: true },
     ]},
-    { section: "Execution", items: [
-      { icon: "map", label: "Roadmap", href: "/workspace/roadmap" },
-      { icon: "360", label: "Conference", href: "/workspace/conference", isFill: true },
-      { icon: "account_tree", label: "Projects", href: "/workspace/projects" },
-      { icon: "check_circle", label: "Tasks", href: "/workspace/tasks" },
-    ]},
-    { section: "Management", items: [
-      { icon: "group", label: "Team", href: "/workspace/team" },
-      { icon: "chat", label: "Discussions", href: "/workspace/discussions" },
-      { icon: "folder", label: "Documents", href: "/workspace/documents" },
-    ]},
     { section: "Network", items: [
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
       { icon: "account_balance_wallet", label: "Investors", href: "/investments" },
