@@ -23,12 +23,23 @@ export const useAuthStore = create<AuthState>()((set) => ({
   loading: true,
   setRole: (role) => set({ role }),
   logout: async () => {
-    await authService.signOut();
+    try {
+      await authService.signOut();
+    } catch (e) {
+      console.error("Sign out error:", e);
+    }
     set({ isAuthenticated: false, user: null, role: null, onboardingComplete: false });
-    // Clear any cached data and redirect to landing page
     if (typeof window !== "undefined") {
-      localStorage.clear();
-      window.location.href = "/";
+      // Remove Supabase-specific storage keys without clearing everything
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith("sb-") || key.startsWith("supabase"))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+      window.location.href = "/login";
     }
   },
   syncSession: async () => {

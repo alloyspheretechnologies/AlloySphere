@@ -21,20 +21,13 @@ const CHANNELS = [
   { id: "design", label: "design", color: "#ec4899" },
 ];
 
-const MOCK_MESSAGES: DiscussionMessage[] = [
-  { id: "1", channel: "general", author_name: "Riya Singh", author_avatar: "", author_color: "#3b82f6", content: "Hey team! Welcome to the general discussion channel. Feel free to share updates here.", created_at: new Date(Date.now() - 3600000).toISOString() },
-  { id: "2", channel: "general", author_name: "Karan Verma", author_avatar: "", author_color: "#3b82f6", content: "Thanks Riya! The new API endpoints are live. Let me know if you find any issues.", created_at: new Date(Date.now() - 1800000).toISOString() },
-  { id: "3", channel: "general", author_name: "Neha Patel", author_avatar: "", author_color: "#10b981", content: "Love the new design system updates. Pushed the latest Figma frames.", created_at: new Date(Date.now() - 600000).toISOString() },
-  { id: "4", channel: "product", author_name: "Arjun Mehta", author_avatar: "", author_color: "#8b5cf6", content: "Q3 roadmap review meeting is scheduled for Friday at 3 PM.", created_at: new Date(Date.now() - 7200000).toISOString() },
-  { id: "5", channel: "dev", author_name: "Karan Verma", author_avatar: "", author_color: "#3b82f6", content: "Deployed v2.1.0 to staging. Please test the new auth flow.", created_at: new Date(Date.now() - 900000).toISOString() },
-  { id: "6", channel: "design", author_name: "Neha Patel", author_avatar: "", author_color: "#10b981", content: "Updated the component library with the new color tokens.", created_at: new Date(Date.now() - 300000).toISOString() },
-];
+const COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ec4899"];
 
 export default function DiscussionsPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeChannel, setActiveChannel] = useState("general");
-  const [messages, setMessages] = useState<DiscussionMessage[]>(MOCK_MESSAGES);
+  const [messages, setMessages] = useState<DiscussionMessage[]>([]);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +49,7 @@ export default function DiscussionsPage() {
       channel: activeChannel,
       author_name: profile.name || "You",
       author_avatar: profile.avatar_url || "",
-      author_color: "#8b5cf6",
+      author_color: COLORS[profile.name?.charCodeAt(0) % COLORS.length || 0],
       content: input.trim(),
       created_at: new Date().toISOString(),
     };
@@ -78,22 +71,19 @@ export default function DiscussionsPage() {
           <p className="text-[10px] text-white/40 mt-0.5">Team channels & conversations</p>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-0.5">
-          {CHANNELS.map((ch) => {
-            const unread = messages.filter((m) => m.channel === ch.id).length;
-            return (
-              <button
-                key={ch.id}
-                onClick={() => setActiveChannel(ch.id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${activeChannel === ch.id ? "bg-white/10 text-white" : "text-white/50 hover:bg-white/5 hover:text-white/70"}`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-white/30 font-mono text-xs">#</span>
-                  <span className="font-medium">{ch.label}</span>
-                </div>
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: ch.color }} />
-              </button>
-            );
-          })}
+          {CHANNELS.map((ch) => (
+            <button
+              key={ch.id}
+              onClick={() => setActiveChannel(ch.id)}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all ${activeChannel === ch.id ? "bg-white/10 text-white" : "text-white/50 hover:bg-white/5 hover:text-white/70"}`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-white/30 font-mono text-xs">#</span>
+                <span className="font-medium">{ch.label}</span>
+              </div>
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: ch.color }} />
+            </button>
+          ))}
         </div>
       </div>
 
@@ -134,7 +124,7 @@ export default function DiscussionsPage() {
           )) : (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <span className="material-symbols-outlined text-[48px] text-white/10 mb-4">forum</span>
-              <p className="text-sm text-white/30">No messages in this channel yet.</p>
+              <p className="text-sm text-white/30">No messages in #{activeChannelObj?.label} yet.</p>
               <p className="text-xs text-white/20 mt-1">Be the first to start the conversation!</p>
             </div>
           )}

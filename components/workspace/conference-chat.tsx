@@ -24,17 +24,8 @@ export function ConferenceChat() {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: "1", sender: "Riya Singh", text: "Hey team, the new design system looks great!", time: "2m ago", color: "#3b82f6" },
-    { id: "2", sender: "Karan Verma", text: "API integration is 90% done. Should be ready by EOD.", time: "1m ago", color: "#3b82f6" },
-    { id: "3", sender: "Neha Patel", text: "I'll push the updated mockups after this call.", time: "30s ago", color: "#10b981" },
-  ]);
-
-  const [docs, setDocs] = useState<SharedDoc[]>([
-    { id: "1", name: "UI Design System.fig", sharedBy: "Riya Singh", time: "2m ago", type: "figma" },
-    { id: "2", name: "API Integration Notes.md", sharedBy: "Karan Verma", time: "5m ago", type: "markdown" },
-    { id: "3", name: "Marketing Strategy.pdf", sharedBy: "David Kumar", time: "1h ago", type: "pdf" },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [docs, setDocs] = useState<SharedDoc[]>([]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -46,7 +37,7 @@ export function ConferenceChat() {
       id: Date.now().toString(),
       sender: "You",
       text: input.trim(),
-      time: "now",
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       color: "#8b5cf6",
     };
     setMessages((prev) => [...prev, msg]);
@@ -94,7 +85,7 @@ export function ConferenceChat() {
           <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
-              {messages.map((msg) => (
+              {messages.length > 0 ? messages.map((msg) => (
                 <div key={msg.id} className={`flex flex-col ${msg.sender === "You" ? "items-end" : "items-start"}`}>
                   <div className={`max-w-[85%] px-3 py-2 rounded-xl text-[13px] leading-relaxed ${msg.sender === "You" ? "bg-indigo-500/20 text-white border border-indigo-500/20" : "bg-white/5 text-white/90 border border-white/5"}`}>
                     {msg.sender !== "You" && (
@@ -104,7 +95,12 @@ export function ConferenceChat() {
                   </div>
                   <span className="text-[9px] text-white/30 mt-0.5 px-1">{msg.time}</span>
                 </div>
-              ))}
+              )) : (
+                <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                  <span className="material-symbols-outlined text-[32px] text-white/10 mb-2">chat</span>
+                  <p className="text-xs text-white/25">No messages yet. Start chatting!</p>
+                </div>
+              )}
             </div>
 
             {/* Input */}
@@ -126,7 +122,7 @@ export function ConferenceChat() {
         ) : (
           <motion.div key="docs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
-              {docs.map((doc) => (
+              {docs.length > 0 ? docs.map((doc) => (
                 <div key={doc.id} className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer group">
                   <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
                     <span className="material-symbols-outlined text-[18px]">{getDocIcon(doc.type)}</span>
@@ -139,7 +135,12 @@ export function ConferenceChat() {
                     <span className="material-symbols-outlined text-[16px] text-white/50">download</span>
                   </button>
                 </div>
-              ))}
+              )) : (
+                <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                  <span className="material-symbols-outlined text-[32px] text-white/10 mb-2">folder_open</span>
+                  <p className="text-xs text-white/25">No shared files yet.</p>
+                </div>
+              )}
             </div>
 
             {/* Upload */}
