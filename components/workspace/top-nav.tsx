@@ -12,28 +12,35 @@ export function TopNav() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    profileService.getCurrentProfile().then(({ data }) => {
-      if (data) {
-        setProfile(data);
-        loadNotifications(data.id);
-      }
-    });
-  }, []);
+    let channel: any;
 
-  const loadNotifications = async (userId: string) => {
-    import("@/lib/services/notification.service").then(async ({ notificationService }) => {
-      const { data } = await notificationService.getNotifications(userId, { pageSize: 10 });
-      setNotifications(data || []);
-      const unread = data?.filter(n => !n.is_read).length || 0;
+    const loadData = async () => {
+      const { data: profData } = await profileService.getCurrentProfile();
+      if (!profData) return;
+      
+      setProfile(profData);
+
+      const { notificationService } = await import("@/lib/services/notification.service");
+      const { data: notifs } = await notificationService.getNotifications(profData.id, { pageSize: 10 });
+      setNotifications(notifs || []);
+      const unread = notifs?.filter(n => !n.is_read).length || 0;
       setUnreadCount(unread);
 
       // Subscribe to realtime notifications
-      notificationService.subscribeToNotifications(userId, (newNotif) => {
+      channel = notificationService.subscribeToNotifications(profData.id, (newNotif) => {
         setNotifications(prev => [newNotif, ...prev]);
         setUnreadCount(prev => prev + 1);
       });
-    });
-  };
+    };
+
+    loadData();
+
+    return () => {
+      if (channel) {
+        channel.unsubscribe();
+      }
+    };
+  }, []);
 
   const handleMarkAllRead = async () => {
     if (!profile) return;
