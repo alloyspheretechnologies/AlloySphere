@@ -74,7 +74,7 @@ export default function FounderWizard() {
       if (startupName.trim()) {
         const slug = startupName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         await startupService.createStartup({
-          owner_id: "", // Will be set by the profile ID from getCurrentProfile
+          owner_id: user.id,
           name: startupName,
           slug,
           industry,

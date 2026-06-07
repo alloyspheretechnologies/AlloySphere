@@ -39,7 +39,7 @@ export default function CreateStartupPage() {
       const slug = startupName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       
       const { data, error } = await startupService.createStartup({
-        owner_id: "", // The service or trigger will link it properly, or we can explicitly pass user.id but `profile.id` is what matters. Wait, `owner_id` is actually linked to `user_id` inside Supabase or handled by `startupService` implicitly. Actually let's look at startupService...
+        owner_id: user.id,
         name: startupName,
         slug,
         industry,
