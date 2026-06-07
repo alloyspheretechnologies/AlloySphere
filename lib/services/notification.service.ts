@@ -23,6 +23,16 @@ export const notificationService = {
     return { data: (data as Notification[]) ?? [], count: count ?? 0, page, pageSize, error };
   },
 
+  async createNotification(payload: { user_id: string; title: string; body: string; type: string; metadata?: any; link?: string }) {
+    const supabase = getSupabaseBrowserClient();
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert([payload])
+      .select()
+      .single();
+    return { data, error };
+  },
+
   async getUnreadCount(userId: string) {
     const supabase = getSupabaseBrowserClient();
     const { count, error } = await supabase
