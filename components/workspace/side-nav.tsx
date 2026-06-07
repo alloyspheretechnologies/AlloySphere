@@ -27,7 +27,6 @@ export function SideNav() {
       { icon: "360", label: "Conference", href: "/workspace/conference", isFill: true },
       { icon: "account_tree", label: "Projects", href: "/workspace/projects" },
       { icon: "check_circle", label: "Tasks", href: "/workspace/tasks" },
-      { icon: "flag", label: "Milestones", href: "/workspace/milestones" },
     ]},
     { section: "Management", items: [
       { icon: "group", label: "Team", href: "/workspace/team" },
@@ -35,7 +34,7 @@ export function SideNav() {
     ]},
     { section: "Network", items: [
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
-      { icon: "account_balance_wallet", label: "Investors", href: "/investors" },
+      { icon: "account_balance_wallet", label: "Investors", href: "/investments" },
       { icon: "insights", label: "Analytics", href: "/workspace/analytics" },
     ]}
   ];
@@ -44,19 +43,11 @@ export function SideNav() {
     { section: "Core", items: [
       { icon: "home", label: "Home", href: "/home" },
       { icon: "explore", label: "Discover Startups", href: "/discover" },
-      { icon: "work", label: "Opportunities", href: "/opportunities" },
+      { icon: "work", label: "Opportunities", href: "/jobs" },
       { icon: "description", label: "Applications", href: "/applications" },
     ]},
-    { section: "Execution", items: [
-      { icon: "assignment", label: "My Contributions", href: "/contributions" },
-      { icon: "check_circle", label: "Tasks", href: "/workspace/tasks" },
-    ]},
-    { section: "Network & Assets", items: [
+    { section: "Network", items: [
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
-      { icon: "mail", label: "Messages", href: "/messages", badge: unreadCount > 0 ? unreadCount : null },
-      { icon: "folder", label: "Documents", href: "/documents" },
-      { icon: "emoji_events", label: "Achievements", href: "/achievements" },
-      { icon: "bookmark", label: "Bookmarks", href: "/bookmarks" },
     ]}
   ];
 
@@ -64,7 +55,7 @@ export function SideNav() {
     { section: "Core", items: [
       { icon: "home", label: "Home", href: "/home" },
       { icon: "explore", label: "Discover Startups", href: "/discover" },
-      { icon: "account_balance_wallet", label: "Portfolio", href: "/portfolio" },
+      { icon: "account_balance_wallet", label: "Portfolio", href: "/investments" },
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
     ]}
   ];

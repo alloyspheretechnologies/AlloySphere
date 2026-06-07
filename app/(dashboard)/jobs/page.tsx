@@ -34,7 +34,12 @@ export default function JobsPage() {
       setProfile(profileRes.data);
 
       if (profileRes.data) {
-        const { data: apps } = await applicationService.getMyApplications(profileRes.data.id, { pageSize: 100 });
+        // Query applications table directly (not the view) to reliably get applied statuses
+        const supabase = (await import("@/lib/supabase/client")).getSupabaseBrowserClient();
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("opportunity_id, status")
+          .eq("applicant_id", profileRes.data.id);
         if (apps) {
           const statusMap = new Map<string, string>();
           apps.forEach((a: any) => statusMap.set(a.opportunity_id, a.status));

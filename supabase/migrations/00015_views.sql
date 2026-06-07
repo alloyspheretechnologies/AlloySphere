@@ -83,10 +83,14 @@ ORDER BY p.created_at DESC;
 CREATE OR REPLACE VIEW application_pipeline_view AS
 SELECT
   a.id,
+  a.applicant_id,
+  a.opportunity_id,
+  a.startup_id,
   a.status,
   a.cover_letter,
   a.applied_at,
   a.reviewed_at,
+  a.created_at,
   o.title AS opportunity_title,
   o.commitment,
   o.location,
