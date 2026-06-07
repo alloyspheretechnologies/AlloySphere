@@ -21,11 +21,22 @@ export default async function StartupRedirectPage() {
     redirect("/login");
   }
 
-  // Find the startup owned by this user
+  // Resolve auth user.id → profiles.id (these are different UUIDs!)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", session.user.id)
+    .single();
+
+  if (!profile) {
+    redirect("/startup/create");
+  }
+
+  // Find the startup owned by this profile
   const { data: startups } = await supabase
     .from("startups")
     .select("slug")
-    .eq("owner_id", session.user.id)
+    .eq("owner_id", profile.id)
     .limit(1)
     .single();
 
@@ -36,7 +47,7 @@ export default async function StartupRedirectPage() {
     const { data: membership } = await supabase
       .from("startup_members")
       .select("startup:startups(slug)")
-      .eq("user_id", session.user.id)
+      .eq("user_id", profile.id)
       .limit(1)
       .single();
     const startupInfo: any = Array.isArray(membership?.startup) ? membership.startup[0] : membership?.startup;

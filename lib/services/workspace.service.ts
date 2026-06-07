@@ -79,7 +79,7 @@ export const workspaceService = {
    */
   subscribeToActivity(workspaceId: string, callback: (payload: WorkspaceActivity) => void) {
     const supabase = getSupabaseBrowserClient();
-    return supabase
+    const channel = supabase
       .channel(`workspace-activity-${workspaceId}`)
       .on(
         'postgres_changes',
@@ -90,7 +90,9 @@ export const workspaceService = {
           filter: `workspace_id=eq.${workspaceId}`,
         },
         (payload) => callback(payload.new as WorkspaceActivity)
-      )
-      .subscribe();
+      );
+
+    channel.subscribe();
+    return channel;
   },
 };

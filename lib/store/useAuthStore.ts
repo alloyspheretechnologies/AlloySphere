@@ -7,6 +7,8 @@ type Role = "founder" | "talent" | "investor" | null;
 interface AuthState {
   isAuthenticated: boolean;
   user: any | null;
+  /** The profile row's UUID (profiles.id) — use this for all DB operations, NOT user.id */
+  profileId: string | null;
   role: Role;
   onboardingComplete: boolean;
   loading: boolean;
@@ -18,6 +20,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set, get) => ({
   isAuthenticated: false,
   user: null,
+  profileId: null,
   role: null,
   onboardingComplete: false,
   loading: true,
@@ -27,7 +30,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     if (!get().isAuthenticated && !get().user) return;
     
     // Optimistically set to prevent re-entrancy
-    set({ isAuthenticated: false, user: null, role: null, onboardingComplete: false });
+    set({ isAuthenticated: false, user: null, profileId: null, role: null, onboardingComplete: false });
 
     try {
       // Add a 1 second timeout to prevent hanging on server-side sign out
@@ -60,12 +63,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       set({
         isAuthenticated: true,
         user,
+        profileId: profile?.id ?? null,
         role: profile?.role as Role,
         onboardingComplete: !!profile?.onboarding_complete,
         loading: false,
       });
     } else {
-      set({ isAuthenticated: false, user: null, role: null, onboardingComplete: false, loading: false });
+      set({ isAuthenticated: false, user: null, profileId: null, role: null, onboardingComplete: false, loading: false });
     }
   },
 }));

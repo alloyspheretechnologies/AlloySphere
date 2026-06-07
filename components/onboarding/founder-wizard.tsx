@@ -33,7 +33,7 @@ export default function FounderWizard() {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
-  const { user, syncSession } = useAuthStore();
+  const { user, profileId, syncSession } = useAuthStore();
 
   // Step 1: Personal
   const [name, setName] = useState(user?.user_metadata?.full_name || user?.user_metadata?.name || "");
@@ -70,11 +70,18 @@ export default function FounderWizard() {
         linkedin_url: linkedin || undefined,
       });
 
-      // 2. Create startup
-      if (startupName.trim()) {
+      // 2. Resolve the correct profile.id for DB operations
+      let ownerProfileId = profileId;
+      if (!ownerProfileId) {
+        const { data: freshProfile } = await profileService.getCurrentProfile();
+        ownerProfileId = freshProfile?.id ?? null;
+      }
+
+      // 3. Create startup
+      if (startupName.trim() && ownerProfileId) {
         const slug = startupName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         await startupService.createStartup({
-          owner_id: user.id,
+          owner_id: ownerProfileId,
           name: startupName,
           slug,
           industry,

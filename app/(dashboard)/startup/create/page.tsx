@@ -22,8 +22,9 @@ const STAGES = [
 
 export default function CreateStartupPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { profileId } = useAuthStore();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [startupName, setStartupName] = useState("");
   const [industry, setIndustry] = useState(INDUSTRIES[0]);
@@ -32,14 +33,21 @@ export default function CreateStartupPage() {
   const [description, setDescription] = useState("");
 
   const handleCreate = async () => {
-    if (!user || !startupName.trim()) return;
+    if (!startupName.trim()) return;
+    setError(null);
+
+    if (!profileId) {
+      setError("Your profile hasn't loaded yet. Please refresh and try again.");
+      return;
+    }
+
     setSaving(true);
 
     try {
       const slug = startupName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       
-      const { data, error } = await startupService.createStartup({
-        owner_id: user.id,
+      const { data, error: dbError } = await startupService.createStartup({
+        owner_id: profileId,
         name: startupName,
         slug,
         industry,
@@ -52,12 +60,14 @@ export default function CreateStartupPage() {
         visibility: "public",
       });
 
-      if (error) throw error;
+      if (dbError) throw dbError;
+      if (!data) throw new Error("Startup creation failed — no data returned. This may be a permissions issue.");
       
       // Redirect to the newly created startup dashboard
       router.push(`/startup/${slug}`);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Startup creation error:", e);
+      setError(e?.message || "Failed to create startup. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -72,6 +82,13 @@ export default function CreateStartupPage() {
         <p className="text-on-surface-variant mb-8">
           Fill in the details below to create your startup workspace and begin building.
         </p>
+
+        {error && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400 font-medium flex items-center gap-3">
+            <span className="material-symbols-outlined text-[20px]">error</span>
+            {error}
+          </div>
+        )}
 
         <div className="space-y-6">
           <div className="space-y-2">
