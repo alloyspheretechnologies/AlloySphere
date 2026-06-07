@@ -18,19 +18,19 @@ export function SideNav() {
 
   const getFounderMenu = () => [
     { section: "Core", items: [
-      { icon: "home", label: "Dashboard", href: "/dashboard" },
+      { icon: "home", label: "Home", href: "/home" },
       { icon: "rocket_launch", label: "Startup", href: "/startup" },
       { icon: "grid_view", label: "Workspace", href: "/workspace", isFill: true },
     ]},
     { section: "Execution", items: [
       { icon: "map", label: "Roadmap", href: "/workspace/roadmap" },
+      { icon: "360", label: "Conference", href: "/workspace/conference", isFill: true },
       { icon: "account_tree", label: "Projects", href: "/workspace/projects" },
       { icon: "check_circle", label: "Tasks", href: "/workspace/tasks" },
       { icon: "flag", label: "Milestones", href: "/workspace/milestones" },
     ]},
     { section: "Management", items: [
       { icon: "group", label: "Team", href: "/workspace/team" },
-      { icon: "description", label: "Applications", href: "/applications" },
       { icon: "folder", label: "Documents", href: "/workspace/documents" },
     ]},
     { section: "Network", items: [
@@ -42,7 +42,7 @@ export function SideNav() {
 
   const getTalentMenu = () => [
     { section: "Core", items: [
-      { icon: "home", label: "Dashboard", href: "/dashboard" },
+      { icon: "home", label: "Home", href: "/home" },
       { icon: "explore", label: "Discover Startups", href: "/discover" },
       { icon: "work", label: "Opportunities", href: "/opportunities" },
       { icon: "description", label: "Applications", href: "/applications" },
@@ -62,7 +62,7 @@ export function SideNav() {
 
   const getInvestorMenu = () => [
     { section: "Core", items: [
-      { icon: "home", label: "Dashboard", href: "/dashboard" },
+      { icon: "home", label: "Home", href: "/home" },
       { icon: "explore", label: "Discover Startups", href: "/discover" },
       { icon: "account_balance_wallet", label: "Portfolio", href: "/portfolio" },
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
@@ -78,7 +78,7 @@ export function SideNav() {
           <div key={section.section} className={idx > 0 ? "mt-4" : ""}>
             <div className="text-xs font-semibold text-on-surface-variant/50 px-4 py-2 uppercase tracking-wider mb-1">{section.section}</div>
             {section.items.map((item) => {
-              const isActive = item.href === "/workspace" || item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
+              const isActive = item.href === "/workspace" || item.href === "/home" ? pathname === item.href : pathname.startsWith(item.href);
               return (
                 <Link key={item.label} href={item.href} className={`py-3 px-4 flex items-center gap-3 rounded-lg transition-colors justify-between ${isActive ? 'bg-secondary-container/20 text-primary border-l-2 border-primary rounded-l-none rounded-r-lg' : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'}`}>
                   <div className="flex items-center gap-3">
@@ -95,7 +95,11 @@ export function SideNav() {
         ))}
       </div>
 
-      <div className="mt-auto px-4 flex flex-col gap-2 pt-4 border-t border-white/5">
+      <div className="mt-auto px-4 flex flex-col gap-1 pt-4 border-t border-white/5">
+        <Link href="/profile" className={`py-3 px-4 flex items-center gap-3 rounded-lg transition-colors ${pathname === '/profile' ? 'bg-secondary-container/20 text-primary border-l-2 border-primary rounded-l-none rounded-r-lg' : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'}`}>
+          <span className="material-symbols-outlined text-[20px]">person</span>
+          <span className="text-sm">Profile</span>
+        </Link>
         <Link href="/settings" className={`py-3 px-4 flex items-center gap-3 rounded-lg transition-colors ${pathname.startsWith('/settings') ? 'bg-secondary-container/20 text-primary border-l-2 border-primary rounded-l-none rounded-r-lg' : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'}`}>
           <span className="material-symbols-outlined text-[20px]">settings</span>
           <span className="text-sm">Settings</span>

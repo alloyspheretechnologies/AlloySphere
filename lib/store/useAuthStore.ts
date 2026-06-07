@@ -25,6 +25,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
   logout: async () => {
     await authService.signOut();
     set({ isAuthenticated: false, user: null, role: null, onboardingComplete: false });
+    // Clear any cached data and redirect to landing page
+    if (typeof window !== "undefined") {
+      localStorage.clear();
+      window.location.href = "/";
+    }
   },
   syncSession: async () => {
     set({ loading: true });

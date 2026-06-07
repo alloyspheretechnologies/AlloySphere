@@ -82,6 +82,17 @@ export const applicationService = {
       .eq('id', appId)
       .select()
       .single();
+
+    if (status === 'accepted' && data && !error) {
+      // Automatically add user to the startup team
+      await supabase.from('startup_members').insert({
+        startup_id: data.startup_id,
+        user_id: data.applicant_id,
+        role: 'member',
+        status: 'active'
+      });
+    }
+
     return { data: data as Application | null, error };
   },
 

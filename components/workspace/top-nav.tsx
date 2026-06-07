@@ -86,7 +86,7 @@ export function TopNav() {
             )}
           </button>
           
-          <Link href="/settings" className="flex items-center gap-3 p-1 pr-3 hover:bg-white/5 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 holographic-lift">
+          <Link href="/profile" className="flex items-center gap-3 p-1 pr-3 hover:bg-white/5 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 holographic-lift">
             {profile?.avatar_url ? (
               <img alt="Profile" className="w-8 h-8 rounded-full object-cover border border-primary/30" src={profile.avatar_url} />
             ) : (

@@ -55,8 +55,9 @@ export const notificationService = {
 
   subscribeToNotifications(userId: string, callback: (notification: Notification) => void) {
     const supabase = getSupabaseBrowserClient();
+    const channelId = `notifications-${userId}-${Math.random().toString(36).substring(7)}`;
     return supabase
-      .channel(`notifications-${userId}`)
+      .channel(channelId)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },

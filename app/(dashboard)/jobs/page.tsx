@@ -19,7 +19,8 @@ export default function JobsPage() {
   const [applyOpp, setApplyOpp] = useState<any>(null);
   const [coverLetter, setCoverLetter] = useState("");
   const [applying, setApplying] = useState(false);
-  const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
+  // Track full application status per opportunity for persistence across refreshes
+  const [appliedStatuses, setAppliedStatuses] = useState<Map<string, string>>(new Map());
 
   useEffect(() => { loadData(); }, []);
 
@@ -34,7 +35,11 @@ export default function JobsPage() {
 
       if (profileRes.data) {
         const { data: apps } = await applicationService.getMyApplications(profileRes.data.id, { pageSize: 100 });
-        if (apps) setAppliedIds(new Set(apps.map((a: any) => a.opportunity_id)));
+        if (apps) {
+          const statusMap = new Map<string, string>();
+          apps.forEach((a: any) => statusMap.set(a.opportunity_id, a.status));
+          setAppliedStatuses(statusMap);
+        }
       }
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
@@ -43,7 +48,7 @@ export default function JobsPage() {
     if (!profile || !applyOpp) return;
     setApplying(true);
     try {
-      await applicationService.apply({
+      const { error } = await applicationService.apply({
         opportunity_id: applyOpp.id,
         applicant_id: profile.id,
         startup_id: applyOpp.startup_id,
@@ -51,7 +56,16 @@ export default function JobsPage() {
         resume_url: null,
         metadata: {},
       });
-      setAppliedIds((prev) => new Set(prev).add(applyOpp.id));
+      if (error) {
+        // Handle duplicate constraint violation gracefully
+        if (error.code === "23505") {
+          setAppliedStatuses((prev) => new Map(prev).set(applyOpp.id, "applied"));
+        } else {
+          console.error(error);
+        }
+      } else {
+        setAppliedStatuses((prev) => new Map(prev).set(applyOpp.id, "applied"));
+      }
       setShowApply(false);
       setCoverLetter("");
       setApplyOpp(null);
@@ -114,8 +128,15 @@ export default function JobsPage() {
             </div>
             <div className="flex items-center gap-3 shrink-0">
               {opp.equity_range && <span className="text-xs text-on-surface-variant">{opp.equity_range} equity</span>}
-              {appliedIds.has(opp.id) ? (
-                <span className="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl text-xs font-bold">Applied ✓</span>
+              {appliedStatuses.has(opp.id) ? (
+                <span className={`px-4 py-2 rounded-xl text-xs font-bold ${
+                  appliedStatuses.get(opp.id) === "accepted" ? "bg-emerald-500/20 text-emerald-400" :
+                  appliedStatuses.get(opp.id) === "rejected" ? "bg-red-500/20 text-red-400" :
+                  appliedStatuses.get(opp.id) === "interview" ? "bg-amber-500/20 text-amber-400" :
+                  appliedStatuses.get(opp.id) === "reviewing" ? "bg-blue-500/20 text-blue-400" :
+                  appliedStatuses.get(opp.id) === "withdrawn" ? "bg-white/5 text-on-surface-variant" :
+                  "bg-emerald-500/20 text-emerald-400"
+                } capitalize`}>{appliedStatuses.get(opp.id) === "applied" ? "Applied ✓" : appliedStatuses.get(opp.id)?.replace("_", " ")}</span>
               ) : (
                 <button onClick={() => { setApplyOpp(opp); setShowApply(true); }}
                   className="bg-white text-black px-6 py-2 rounded-xl transition-all font-semibold text-sm hover:bg-white/90">

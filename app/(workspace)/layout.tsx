@@ -67,11 +67,11 @@ export default function WorkspaceGroupLayout({ children }: { children: React.Rea
         <aside className="w-64 border-r border-white/10 bg-surface-container flex flex-col pt-6 z-10 shrink-0 hidden md:flex">
           <div className="px-6 mb-6">
             <Link
-              href="/dashboard"
+              href="/home"
               className="text-xs font-semibold text-on-surface-variant hover:text-white flex items-center gap-1 transition-colors mb-4"
-              aria-label="Back to Dashboard"
+              aria-label="Back to Home"
             >
-              <span className="material-symbols-outlined text-[14px]">arrow_back</span> Back to App
+              <span className="material-symbols-outlined text-[14px]">arrow_back</span> Back to Home
             </Link>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white font-bold shadow-glow">

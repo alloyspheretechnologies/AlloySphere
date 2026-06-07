@@ -188,7 +188,7 @@ export function ScrollPortraitWall({
 
       {/* Sticky centred title — inverts against whatever portrait is behind it */}
       <div className="pointer-events-none sticky top-1/2 z-20 -translate-y-1/2 text-center text-white mix-blend-exclusion">
-        <h2 className="text-5xl font-semibold tracking-tighter sm:text-7xl md:text-8xl lg:text-9xl">
+        <h2 className="text-4xl font-semibold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
           {title}
         </h2>
         {date && (

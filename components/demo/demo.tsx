@@ -14,23 +14,22 @@ const speakers: Speaker[] = [
   { name: "Clara Boström", role: "VP Product, Figma" },
   { name: "Rafael Ortega", role: "Motion Lead" },
   { name: "Hannah Whitfield", role: "DX Engineer, Stripe" },
-  { name: "Yusuf Demir", role: "Research, DeepMind" },
 ].map((s, i) => ({
   ...s,
   src: `https://images.unsplash.com/photo-${[
-    "1507003211169-0a1dd7228f2d",
-    "1438761681033-6461ffad8d80",
-    "1500648767791-00dcc994a43e",
-    "1534528741775-53994a69daeb",
-    "1539571696354-2457f5ae918c",
-  ][i % 5]}?w=400&h=400&fit=crop&crop=faces&auto=format&q=80`,
+    "1522071820081-009f0129c71c", // Team working at laptop
+    "1531482615713-2afd69097998", // Planning/whiteboarding
+    "1517048676732-d65bc937f952", // Collaboration/screens
+    "1522202176988-66273c2fd55f", // Discussing ideas
+    "1552664730-d307ca884978", // Brainstorming
+  ][i % 5]}?w=600&h=600&fit=crop&q=80`,
 }));
 
 export default function ScrollPortraitWallDemo() {
   return (
     <ScrollPortraitWall
-      title="The Lineup"
-      hint="scroll to meet the lineup"
+      title="AlloySphere"
+      hint="scroll to explore the network"
       date="Sep 18, 2026"
       speakers={speakers}
       showCaptions={false}
