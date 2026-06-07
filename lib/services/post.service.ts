@@ -62,5 +62,75 @@ export const postService = {
     const supabase = getSupabaseBrowserClient();
     const { error } = await supabase.from('posts').delete().eq('id', postId);
     return { error };
+  },
+
+  /**
+   * Get comments for a post
+   */
+  async getComments(postId: string) {
+    const supabase = getSupabaseBrowserClient();
+    const { data, error } = await supabase
+      .from('post_comments')
+      .select('*, author:profiles!post_comments_author_id_fkey(name, avatar_url, headline)')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true });
+    return { data, error };
+  },
+
+  /**
+   * Create a comment on a post
+   */
+  async createComment(payload: { post_id: string; author_id: string; content: string }) {
+    const supabase = getSupabaseBrowserClient();
+    const { data, error } = await supabase
+      .from('post_comments')
+      .insert({
+        post_id: payload.post_id,
+        author_id: payload.author_id,
+        content: payload.content,
+      })
+      .select('*, author:profiles!post_comments_author_id_fkey(name, avatar_url, headline)')
+      .single();
+    return { data, error };
+  },
+
+  /**
+   * Get trending startups based on recent post engagement
+   */
+  async getTrendingStartups(limit: number = 5) {
+    const supabase = getSupabaseBrowserClient();
+    // Since we don't have a complex algorithm in the DB yet, we'll fetch startups
+    // sorted by the sum of likes and comments on their posts.
+    // For simplicity, we query posts with a startup_id, group by startup, and sum engagement.
+    // Alternatively, we can use an RPC if available. Since it might not be, we'll fetch recent posts and aggregate locally.
+    const { data, error } = await supabase
+      .from('posts')
+      .select('likes_count, comments_count, startup:startups!posts_startup_id_fkey(id, name, slug, logo_url, industry)')
+      .not('startup_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error || !data) return { data: [], error };
+
+    const engagementMap = new Map<string, { startup: any; score: number }>();
+    
+    data.forEach(post => {
+      if (!post.startup) return;
+      const startupObj = Array.isArray(post.startup) ? post.startup[0] : post.startup;
+      if (!startupObj) return;
+      
+      const sId = startupObj.id;
+      const score = (post.likes_count || 0) + (post.comments_count || 0);
+      if (!engagementMap.has(sId)) {
+        engagementMap.set(sId, { startup: startupObj, score: 0 });
+      }
+      engagementMap.get(sId)!.score += score;
+    });
+
+    const trending = Array.from(engagementMap.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+
+    return { data: trending, error: null };
   }
 };

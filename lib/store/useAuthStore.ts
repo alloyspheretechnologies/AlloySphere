@@ -24,7 +24,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
   setRole: (role) => set({ role }),
   logout: async () => {
     try {
-      await authService.signOut();
+      // Add a 1 second timeout to prevent hanging on server-side sign out
+      await Promise.race([
+        authService.signOut(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Sign out timeout")), 1000))
+      ]);
     } catch (e) {
       console.error("Sign out error:", e);
     }
