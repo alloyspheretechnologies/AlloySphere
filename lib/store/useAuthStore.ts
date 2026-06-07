@@ -15,7 +15,7 @@ interface AuthState {
   syncSession: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>()((set) => ({
+export const useAuthStore = create<AuthState>()((set, get) => ({
   isAuthenticated: false,
   user: null,
   role: null,
@@ -23,6 +23,12 @@ export const useAuthStore = create<AuthState>()((set) => ({
   loading: true,
   setRole: (role) => set({ role }),
   logout: async () => {
+    // Prevent infinite loop if already signed out
+    if (!get().isAuthenticated && !get().user) return;
+    
+    // Optimistically set to prevent re-entrancy
+    set({ isAuthenticated: false, user: null, role: null, onboardingComplete: false });
+
     try {
       // Add a 1 second timeout to prevent hanging on server-side sign out
       await Promise.race([
@@ -32,7 +38,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
     } catch (e) {
       console.error("Sign out error:", e);
     }
-    set({ isAuthenticated: false, user: null, role: null, onboardingComplete: false });
+    
     if (typeof window !== "undefined") {
       // Remove Supabase-specific storage keys without clearing everything
       const keysToRemove: string[] = [];

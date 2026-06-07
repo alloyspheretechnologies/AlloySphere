@@ -49,14 +49,19 @@ export async function updateSession(request: NextRequest) {
         .eq('user_id', user.id)
         .single();
         
-      if (!profile?.role) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/role-selection';
-        return NextResponse.redirect(url);
-      } else if (!profile?.onboarding_complete) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/onboarding';
-        return NextResponse.redirect(url);
+      if (!profile?.onboarding_complete) {
+        // Since the DB schema defaults 'role' to 'talent', we use a cookie to track explicit selection.
+        const hasSelectedRole = request.cookies.has('role_selected');
+        
+        if (!hasSelectedRole) {
+          const url = request.nextUrl.clone();
+          url.pathname = '/role-selection';
+          return NextResponse.redirect(url);
+        } else {
+          const url = request.nextUrl.clone();
+          url.pathname = '/onboarding';
+          return NextResponse.redirect(url);
+        }
       }
     }
 

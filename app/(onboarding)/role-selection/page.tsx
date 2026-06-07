@@ -16,7 +16,8 @@ export default function RoleSelectionPage() {
   useEffect(() => {
     profileService.getCurrentProfile().then(({ data }) => {
       if (!data) router.push("/login");
-      else if (data.role) router.push("/onboarding");
+      else if (data.onboarding_complete) router.push("/dashboard");
+      else if (document.cookie.includes("role_selected=true")) router.push("/onboarding");
       else setProfile(data);
     });
   }, [router]);
@@ -26,6 +27,8 @@ export default function RoleSelectionPage() {
     setLoading(true);
     await profileService.setRole(user.id, selectedRole);
     await syncSession();
+    // Set a cookie so middleware knows we have explicitly selected a role
+    document.cookie = "role_selected=true; path=/; max-age=31536000";
     router.push("/onboarding");
   };
 
