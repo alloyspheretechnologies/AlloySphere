@@ -10,6 +10,7 @@ import { projectService } from "@/lib/services/project.service";
 import { workspaceService } from "@/lib/services/workspace.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { roadmapService } from "@/lib/services/roadmap.service";
+import { realtimeService } from "@/lib/services/realtime.service";
 
 export default function StartupProfilePage() {
   const params = useParams();
@@ -23,6 +24,10 @@ export default function StartupProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [rankScore, setRankScore] = useState(0);
   const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -67,25 +72,85 @@ export default function StartupProfilePage() {
         .eq("startup_id", s.id).order("created_at", { ascending: false }).limit(5);
       setPosts(postData || []);
 
-      // Check follow/save status
+      // Check follow/like/save status
       if (prof) {
-        const { data: followData } = await supabase.from("startup_followers").select("id").eq("startup_id", s.id).eq("user_id", prof.id).maybeSingle();
-        setIsFollowing(!!followData);
-        const { data: savedData } = await supabase.from("saved_startups").select("id").eq("startup_id", s.id).eq("user_id", prof.id).maybeSingle();
+        const [{ isFollowing }, { isLiked }, { data: savedData }] = await Promise.all([
+          startupService.isFollowing(s.id, prof.id),
+          startupService.isLiked(s.id, prof.id),
+          supabase.from("saved_startups").select("id").eq("startup_id", s.id).eq("user_id", prof.id).maybeSingle()
+        ]);
+        setIsFollowing(isFollowing);
+        setIsLiked(isLiked);
         setIsSaved(!!savedData);
       }
+
+      // Get initial counts
+      const [{ count: likes }, { count: followers }, { data: ranking }] = await Promise.all([
+        supabase.from("startup_likes").select("*", { count: 'exact', head: true }).eq("startup_id", s.id),
+        supabase.from("startup_followers").select("*", { count: 'exact', head: true }).eq("startup_id", s.id),
+        supabase.from("startup_rankings").select("score").eq("startup_id", s.id).maybeSingle()
+      ]);
+      setLikesCount(likes ?? 0);
+      setFollowersCount(followers ?? 0);
+      setRankScore(ranking?.score ?? 0);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
 
+  useEffect(() => {
+    if (!startup?.id) return;
+    
+    const unsubscribe = realtimeService.subscribeToStartupEngagement(startup.id, {
+      onLike: (payload) => {
+        if (payload.eventType === 'INSERT') setLikesCount(c => c + 1);
+        if (payload.eventType === 'DELETE') setLikesCount(c => Math.max(0, c - 1));
+      },
+      onFollow: (payload) => {
+        if (payload.eventType === 'INSERT') setFollowersCount(c => c + 1);
+        if (payload.eventType === 'DELETE') setFollowersCount(c => Math.max(0, c - 1));
+      },
+      onRankingUpdate: (payload) => {
+        if (payload.new && payload.new.score !== undefined) {
+          setRankScore(payload.new.score);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [startup?.id]);
+
   const handleFollow = async () => {
     if (!profile || !startup) return;
-    const supabase = getSupabaseBrowserClient();
-    if (isFollowing) {
-      await supabase.from("startup_followers").delete().eq("startup_id", startup.id).eq("user_id", profile.id);
-    } else {
-      await supabase.from("startup_followers").upsert({ startup_id: startup.id, user_id: profile.id });
+    if (startup.owner_id === profile.id) return alert('You cannot follow your own startup.');
+    
+    const prev = isFollowing;
+    setIsFollowing(!prev);
+    setFollowersCount(c => prev ? Math.max(0, c - 1) : c + 1);
+    
+    const { error } = prev 
+      ? await startupService.unfollowStartup(startup.id, profile.id)
+      : await startupService.followStartup(startup.id, profile.id);
+      
+    if (error) {
+      setIsFollowing(prev);
+      setFollowersCount(c => prev ? c + 1 : Math.max(0, c - 1));
     }
-    setIsFollowing(!isFollowing);
+  };
+
+  const handleLike = async () => {
+    if (!profile || !startup) return;
+    
+    const prev = isLiked;
+    setIsLiked(!prev);
+    setLikesCount(c => prev ? Math.max(0, c - 1) : c + 1);
+
+    const { error } = prev
+      ? await startupService.unlikeStartup(startup.id, profile.id)
+      : await startupService.likeStartup(startup.id, profile.id);
+
+    if (error) {
+      setIsLiked(prev);
+      setLikesCount(c => prev ? c + 1 : Math.max(0, c - 1));
+    }
   };
 
   const handleSave = async () => {
@@ -121,20 +186,25 @@ export default function StartupProfilePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">{startup.name}</h1>
-                <p className="text-sm text-on-surface-variant">{startup.industry} • <span className="capitalize">{startup.stage?.replace("_", " ")}</span> • {startup.team_size || members.length} Members</p>
+                <p className="text-sm text-on-surface-variant">
+                  {startup.industry} • <span className="capitalize">{startup.stage?.replace("_", " ")}</span> • {startup.team_size || members.length} Members
+                  {rankScore > 0 && <span className="ml-2 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-bold border border-emerald-500/20">Rank Score: {rankScore}</span>}
+                </p>
               </div>
             </div>
             <div className="flex gap-3">
-              <button onClick={handleSave}
-                className="px-4 py-2 bg-white/5 text-white rounded-xl text-sm font-semibold border border-white/10 hover:bg-white/10 transition-colors flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px]" style={isSaved ? { fontVariationSettings: "'FILL' 1" } : undefined}>bookmark</span>
-                {isSaved ? "Saved" : "Save"}
+              <button onClick={handleLike}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 border ${
+                  isLiked ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : "bg-white/5 text-white border-white/10 hover:bg-white/10"
+                }`}>
+                <span className="material-symbols-outlined text-[18px]" style={isLiked ? { fontVariationSettings: "'FILL' 1" } : undefined}>favorite</span>
+                {likesCount} {isLiked ? "Liked" : "Like"}
               </button>
               <button onClick={handleFollow}
                 className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
                   isFollowing ? "bg-white/10 text-white border border-white/10" : "bg-white text-black hover:bg-white/90"
                 }`}>
-                {isFollowing ? "Following" : "Follow"}
+                {followersCount} {isFollowing ? "Following" : "Follow"}
               </button>
             </div>
           </div>

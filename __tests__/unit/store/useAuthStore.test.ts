@@ -63,26 +63,19 @@ describe('useAuthStore', () => {
   });
 
   describe('logout', () => {
-    const originalLocation = window.location;
-    const mockSetHref = jest.fn();
+    let consoleErrorSpy: jest.SpyInstance;
 
     beforeAll(() => {
-      delete (window as any).location;
-      window.location = Object.defineProperties(
-        {},
-        {
-          ...Object.getOwnPropertyDescriptors(originalLocation),
-          href: {
-            configurable: true,
-            get: () => 'http://localhost/',
-            set: mockSetHref
-          }
-        }
-      ) as any;
+      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation((msg) => {
+        if (msg && msg.toString().includes('Not implemented: navigation')) return;
+        if (typeof msg === 'object' && msg.message && msg.message.includes('Not implemented: navigation')) return;
+        // Output other errors normally
+        console.warn(msg); // using warn to not trigger the spy again if we used error
+      });
     });
 
     afterAll(() => {
-      window.location = originalLocation;
+      consoleErrorSpy.mockRestore();
     });
 
     it('should prevent re-entrancy if already logged out', async () => {

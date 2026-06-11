@@ -30,7 +30,7 @@ export default function ScrollPortraitWallDemo() {
     <ScrollPortraitWall
       title="AlloySphere"
       hint="scroll to explore the network"
-      date="Sep 18, 2026"
+      date="March 25, 2026"
       speakers={speakers}
       showCaptions={false}
     />

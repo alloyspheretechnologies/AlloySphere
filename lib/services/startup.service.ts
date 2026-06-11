@@ -205,6 +205,13 @@ export const startupService = {
    */
   async followStartup(startupId: string, profileId: string) {
     const supabase = getSupabaseBrowserClient();
+    
+    // Check if user is owner
+    const { data: startup } = await supabase.from('startups').select('owner_id').eq('id', startupId).single();
+    if (startup?.owner_id === profileId) {
+      return { error: new Error('You cannot follow your own startup') };
+    }
+
     const { error } = await supabase
       .from('startup_followers')
       .insert({ startup_id: startupId, user_id: profileId });
@@ -239,5 +246,87 @@ export const startupService = {
       .maybeSingle();
 
     return { isFollowing: !!data, error };
+  },
+
+  // ===== Likes =====
+
+  /**
+   * Like a startup
+   */
+  async likeStartup(startupId: string, profileId: string) {
+    const supabase = getSupabaseBrowserClient();
+    const { error } = await supabase
+      .from('startup_likes')
+      .insert({ startup_id: startupId, user_id: profileId });
+
+    return { error };
+  },
+
+  /**
+   * Unlike a startup
+   */
+  async unlikeStartup(startupId: string, profileId: string) {
+    const supabase = getSupabaseBrowserClient();
+    const { error } = await supabase
+      .from('startup_likes')
+      .delete()
+      .eq('startup_id', startupId)
+      .eq('user_id', profileId);
+
+    return { error };
+  },
+
+  /**
+   * Check if user likes a startup
+   */
+  async isLiked(startupId: string, profileId: string) {
+    const supabase = getSupabaseBrowserClient();
+    const { data, error } = await supabase
+      .from('startup_likes')
+      .select('id')
+      .eq('startup_id', startupId)
+      .eq('user_id', profileId)
+      .maybeSingle();
+
+    return { isLiked: !!data, error };
+  },
+
+  // ===== Rankings =====
+
+  /**
+   * Get trending startups
+   */
+  async getTrendingStartups(options?: { page?: number; pageSize?: number }) {
+    const supabase = getSupabaseBrowserClient();
+    const page = options?.page ?? 1;
+    const pageSize = options?.pageSize ?? 10;
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await supabase
+      .from('startup_rankings')
+      .select(`
+        score,
+        rank_position,
+        startup:startups (
+          id,
+          name,
+          slug,
+          industry,
+          logo_url,
+          description
+        )
+      `, { count: 'exact' })
+      .order('score', { ascending: false })
+      .range(from, to);
+
+    return {
+      data: data ?? [],
+      count: count ?? 0,
+      page,
+      pageSize,
+      totalPages: Math.ceil((count ?? 0) / pageSize),
+      error,
+    };
   },
 };

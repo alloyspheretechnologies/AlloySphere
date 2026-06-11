@@ -99,7 +99,12 @@ export default function HomePage() {
       });
 
       // ---- Trending Startups ----
-      const { data: startups } = await startupService.listStartups({ pageSize: 6 });
+      const { data: trending } = await startupService.getTrendingStartups({ pageSize: 6 });
+      const startups = trending.map((t: any) => ({
+        ...t.startup,
+        score: t.score,
+        rank_position: t.rank_position
+      }));
       setTrendingStartups(startups || []);
 
       // ---- Community Feed ----
