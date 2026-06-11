@@ -44,6 +44,10 @@ describe('Founder Workflow Integration', () => {
       stage: 'idea',
       status: 'active',
       visibility: 'public',
+      description: null,
+      website: null,
+      logo_url: null,
+      cover_image: null,
     });
 
     // Simulate finish

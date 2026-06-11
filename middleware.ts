@@ -7,7 +7,7 @@ const ipRequests = new Map<string, { count: number; timestamp: number }>();
 
 export async function middleware(request: NextRequest) {
   // Basic Rate Limiting
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'anonymous';
+  const ip = request.headers.get('x-forwarded-for') || 'anonymous';
   const now = Date.now();
   const reqData = ipRequests.get(ip);
 
