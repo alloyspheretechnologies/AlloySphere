@@ -39,28 +39,25 @@ export const documentService = {
 
   // ===== Documents =====
 
-  async uploadDocument(workspaceId: string, file: File, folderId?: string, uploadedBy?: string) {
+  async uploadDocument(workspaceId: string, file: File, folderId?: string, uploadedBy?: string, bucketName: string = 'documents') {
     const supabase = getSupabaseBrowserClient();
     const path = `${workspaceId}/${folderId ?? 'root'}/${Date.now()}_${file.name}`;
 
     // Upload to storage
     const { data: storageData, error: storageError } = await supabase.storage
-      .from('documents')
+      .from(bucketName)
       .upload(path, file);
 
     if (storageError) return { data: null, error: storageError };
 
-    // Store the storage path — NOT a public URL (bucket is private).
-    // Use createSignedUrl() when the user needs to download.
-
-    // Create document record
+    // Create document record (we can still track it in the DB even if it's in conference_files)
     const { data, error } = await supabase
       .from('documents')
       .insert({
         workspace_id: workspaceId,
         folder_id: folderId,
         name: file.name,
-        file_url: path, // Store the storage path, not a public URL
+        file_url: path,
         file_type: file.type,
         file_size: file.size,
         uploaded_by: uploadedBy,
@@ -68,7 +65,7 @@ export const documentService = {
       .select()
       .single();
 
-    return { data: data as Document | null, error };
+    return { data: data as Document | null, error, path };
   },
 
   async listDocuments(workspaceId: string, folderId?: string | null) {
@@ -91,32 +88,27 @@ export const documentService = {
     return { data: data ?? [], error };
   },
 
-  async deleteDocument(documentId: string) {
+  async deleteDocument(documentId: string, bucketName: string = 'documents') {
     const supabase = getSupabaseBrowserClient();
 
-    // Get the document to find its storage path
     const { data: doc } = await supabase
       .from('documents')
       .select('file_url')
       .eq('id', documentId)
       .single();
 
-    // Delete from storage if URL exists
     if (doc?.file_url) {
-      const path = doc.file_url.split('/documents/')[1];
-      if (path) {
-        await supabase.storage.from('documents').remove([path]);
-      }
+      // Direct path deletion based on how we stored it
+      await supabase.storage.from(bucketName).remove([doc.file_url]);
     }
 
-    // Delete record
     const { error } = await supabase.from('documents').delete().eq('id', documentId);
     return { error };
   },
 
-  async getDocumentUrl(path: string) {
+  async getDocumentUrl(path: string, bucketName: string = 'documents') {
     const supabase = getSupabaseBrowserClient();
-    const { data } = await supabase.storage.from('documents').createSignedUrl(path, 3600);
+    const { data } = await supabase.storage.from(bucketName).createSignedUrl(path, 3600);
     return { url: data?.signedUrl ?? null };
   },
 };

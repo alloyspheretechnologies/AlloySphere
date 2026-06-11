@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { profileService } from "@/lib/services/profile.service";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { authService } from "@/lib/services/auth.service";
+import { investorService } from "@/lib/services/investor.service";
 import AvatarUpload from "@/components/settings/avatar-upload";
+import { DocumentUpload } from "@/components/settings/document-upload";
 
-type SettingsSection = "profile" | "account" | "notifications" | "privacy" | "appearance" | "danger";
+type SettingsSection = "profile" | "account" | "notifications" | "privacy" | "appearance" | "documents" | "danger";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -29,6 +31,12 @@ export default function SettingsPage() {
   const [github, setGithub] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [portfolio, setPortfolio] = useState("");
+
+  // Document URLs
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [certificationsUrl, setCertificationsUrl] = useState<string | null>(null);
+  const [investorProfileUrl, setInvestorProfileUrl] = useState<string | null>(null);
+  const [portfolioOverviewUrl, setPortfolioOverviewUrl] = useState<string | null>(null);
 
   // Notification prefs (visual placeholders)
   const [emailNotifs, setEmailNotifs] = useState(true);
@@ -56,6 +64,16 @@ export default function SettingsPage() {
         setGithub(data.github_url || "");
         setLinkedin(data.linkedin_url || "");
         setPortfolio(data.portfolio_url || "");
+        setResumeUrl(data.resume_url || null);
+        setCertificationsUrl(data.certifications_url || null);
+        
+        if (data.role === 'investor' || data.role === 'admin') {
+          const { data: invData } = await investorService.getInvestorProfile(data.user_id);
+          if (invData) {
+            setInvestorProfileUrl(invData.investor_profile_url || null);
+            setPortfolioOverviewUrl(invData.portfolio_overview_url || null);
+          }
+        }
       }
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
@@ -116,6 +134,7 @@ export default function SettingsPage() {
 
   const sections: { id: SettingsSection; label: string; icon: string }[] = [
     { id: "profile", label: "Profile", icon: "person" },
+    { id: "documents", label: "Documents", icon: "folder" },
     { id: "account", label: "Account", icon: "manage_accounts" },
     { id: "notifications", label: "Notifications", icon: "notifications" },
     { id: "privacy", label: "Privacy", icon: "lock" },
@@ -276,6 +295,93 @@ export default function SettingsPage() {
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Documents Settings */}
+          {activeSection === "documents" && (
+            <div className="glass-panel p-8 rounded-2xl border border-white/10 space-y-8 animate-in fade-in">
+              <div>
+                <h2 className="text-xl font-bold text-white mb-1">Personal Documents</h2>
+                <p className="text-sm text-on-surface-variant">Upload and manage your personal documents and attachments.</p>
+              </div>
+
+              {(profile?.role === 'talent' || profile?.role === 'startup' || profile?.role === 'admin') && (
+                <div className="space-y-6">
+                  <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">Talent / Career Documents</h3>
+                  
+                  <DocumentUpload
+                    label="Resume / CV"
+                    description="Upload your latest resume (PDF or DOCX)."
+                    currentUrl={resumeUrl}
+                    bucketName="profile_documents"
+                    folderPath="resumes"
+                    acceptedTypes=".pdf,.doc,.docx"
+                    onUploadSuccess={async (url) => {
+                      await profileService.updateProfile(profile.user_id, { resume_url: url });
+                      setResumeUrl(url);
+                    }}
+                    onDeleteSuccess={async () => {
+                      await profileService.updateProfile(profile.user_id, { resume_url: null });
+                      setResumeUrl(null);
+                    }}
+                  />
+
+                  <DocumentUpload
+                    label="Certifications"
+                    description="Upload relevant certificates or licenses."
+                    currentUrl={certificationsUrl}
+                    bucketName="profile_documents"
+                    folderPath="certifications"
+                    onUploadSuccess={async (url) => {
+                      await profileService.updateProfile(profile.user_id, { certifications_url: url });
+                      setCertificationsUrl(url);
+                    }}
+                    onDeleteSuccess={async () => {
+                      await profileService.updateProfile(profile.user_id, { certifications_url: null });
+                      setCertificationsUrl(null);
+                    }}
+                  />
+                </div>
+              )}
+
+              {(profile?.role === 'investor' || profile?.role === 'admin') && (
+                <div className="space-y-6 pt-6 border-t border-white/5">
+                  <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">Investor Documents</h3>
+                  
+                  <DocumentUpload
+                    label="Investor Profile / Deck"
+                    description="Upload your personal investor thesis or introductory deck."
+                    currentUrl={investorProfileUrl}
+                    bucketName="profile_documents"
+                    folderPath="investor_profiles"
+                    onUploadSuccess={async (url) => {
+                      await investorService.updateInvestorProfile(profile.user_id, { investor_profile_url: url });
+                      setInvestorProfileUrl(url);
+                    }}
+                    onDeleteSuccess={async () => {
+                      await investorService.updateInvestorProfile(profile.user_id, { investor_profile_url: null });
+                      setInvestorProfileUrl(null);
+                    }}
+                  />
+
+                  <DocumentUpload
+                    label="Portfolio Overview"
+                    description="Upload a summary of your current portfolio companies."
+                    currentUrl={portfolioOverviewUrl}
+                    bucketName="profile_documents"
+                    folderPath="portfolios"
+                    onUploadSuccess={async (url) => {
+                      await investorService.updateInvestorProfile(profile.user_id, { portfolio_overview_url: url });
+                      setPortfolioOverviewUrl(url);
+                    }}
+                    onDeleteSuccess={async () => {
+                      await investorService.updateInvestorProfile(profile.user_id, { portfolio_overview_url: null });
+                      setPortfolioOverviewUrl(null);
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
 

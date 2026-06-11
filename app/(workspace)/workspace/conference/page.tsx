@@ -6,6 +6,9 @@ import { profileService } from "@/lib/services/profile.service";
 import { startupService } from "@/lib/services/startup.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
+import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
+import "@livekit/components-styles";
+
 import { ConferenceScene } from "@/components/workspace/conference-scene";
 import { ConferenceChat } from "@/components/workspace/conference-chat";
 import { BottomStrategyBar } from "@/components/workspace/bottom-strategy-bar";
@@ -56,13 +59,16 @@ export default function ConferencePage() {
     return { angle, distance };
   };
 
+  const [liveKitToken, setLiveKitToken] = useState<string | null>(null);
+
   const startConference = async () => {
     if (!profile || !startup) return;
 
     setIsLive(true);
+    
+    // 1. Setup Supabase Channel for Chat/Presence
     const supabase = getSupabaseBrowserClient();
-    const channelId = `conference-${startup.id}-${Date.now().toString(36)}`;
-
+    const channelId = `conference-${startup.id}`;
     const channel = supabase.channel(channelId, {
       config: { presence: { key: profile.id } },
     });
@@ -95,32 +101,26 @@ export default function ConferencePage() {
             avatar: profile.avatar_url || "",
             joined_at: new Date().toISOString(),
           });
-
-          // Send notification to team members
-          try {
-            const { notificationService } = await import("@/lib/services/notification.service");
-            const { data: teamMembers } = await supabase
-              .from("startup_members")
-              .select("user_id")
-              .eq("startup_id", startup.id)
-              .neq("user_id", profile.id);
-
-            if (teamMembers) {
-              for (const member of teamMembers) {
-                await notificationService.createNotification({
-                  user_id: member.user_id,
-                  title: "Conference Started",
-                  body: `${profile.name} started a live conference for ${startup.name}. Join now!`,
-                  type: "conference_invite",
-                  metadata: { startup_id: startup.id, channel_id: channelId },
-                });
-              }
-            }
-          } catch (e) {
-            console.error("Failed to send notifications:", e);
-          }
         }
       });
+
+    // 2. Fetch LiveKit Token for Audio
+    try {
+      const res = await fetch('/api/livekit/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomName: channelId }),
+      });
+      const data = await res.json();
+      if (data.token) {
+        setLiveKitToken(data.token);
+      } else {
+        console.error("Failed to fetch LiveKit token:", data.error);
+        alert("Failed to connect to audio server.");
+      }
+    } catch (err) {
+      console.error("LiveKit connection error:", err);
+    }
   };
 
   const leaveConference = () => {
@@ -129,6 +129,7 @@ export default function ConferencePage() {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
+    setLiveKitToken(null);
     setIsLive(false);
     setParticipants([]);
   };
@@ -184,7 +185,21 @@ export default function ConferencePage() {
       <div className="flex-1 flex gap-4 min-h-0">
         <div className="flex-1 glass-panel border border-white/10 rounded-2xl relative overflow-hidden flex flex-col bg-black/30">
           <div className="flex-1 relative">
-            <ConferenceScene members={participants} isMuted={isMuted} isScreenSharing={isScreenSharing} />
+            {liveKitToken ? (
+              <LiveKitRoom
+                video={false}
+                audio={!isMuted}
+                token={liveKitToken}
+                serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
+                // Use default connect options
+                connect={true}
+              >
+                <ConferenceScene members={participants} isMuted={isMuted} isScreenSharing={isScreenSharing} />
+                <RoomAudioRenderer />
+              </LiveKitRoom>
+            ) : (
+              <ConferenceScene members={participants} isMuted={isMuted} isScreenSharing={isScreenSharing} />
+            )}
           </div>
 
           {/* Floating Toolbar */}
@@ -203,7 +218,7 @@ export default function ConferencePage() {
 
         {showChat && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-80 shrink-0 glass-panel border border-white/10 rounded-2xl overflow-hidden min-h-0 flex flex-col">
-            <ConferenceChat />
+            <ConferenceChat channel={channelRef.current} profile={profile} />
           </motion.div>
         )}
       </div>

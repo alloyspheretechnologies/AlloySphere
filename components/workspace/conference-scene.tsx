@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useParticipants } from "@livekit/components-react";
 
 interface TeamMember {
   id: string;
@@ -14,6 +15,9 @@ interface TeamMember {
 }
 
 export function ConferenceScene({ members, isMuted, isScreenSharing }: { members: TeamMember[], isMuted: boolean, isScreenSharing: boolean }) {
+  // Pull real-time audio state from LiveKit context
+  const liveKitParticipants = useParticipants();
+
   const getPosition = (angle: number, distance: number) => {
     const rad = (angle * Math.PI) / 180;
     const r = (distance / 100) * 280;
@@ -55,6 +59,9 @@ export function ConferenceScene({ members, isMuted, isScreenSharing }: { members
       <div className="absolute top-1/2 left-1/2 w-0 h-0 z-30">
         {members.map((member, idx) => {
           const { x, y } = getPosition(member.angle, member.distance);
+          const lkParticipant = liveKitParticipants.find(p => p.identity === member.id);
+          const isSpeaking = lkParticipant?.isSpeaking;
+
           return (
             <motion.div
               key={member.id}
@@ -70,11 +77,11 @@ export function ConferenceScene({ members, isMuted, isScreenSharing }: { members
               </div>
 
               {/* Beam */}
-              <div className="absolute bottom-0 w-10 h-16 opacity-25 blur-sm pointer-events-none origin-bottom" style={{ background: `linear-gradient(to top, ${member.color}, transparent)` }} />
+              <div className={`absolute bottom-0 w-10 h-16 blur-sm pointer-events-none origin-bottom transition-all duration-300 ${isSpeaking ? 'opacity-60 scale-y-125' : 'opacity-25'}`} style={{ background: `linear-gradient(to top, ${member.color}, transparent)` }} />
 
               {/* Floating avatar card */}
               <motion.div animate={{ y: [-3, 3, -3] }} transition={{ duration: 2.5 + idx * 0.3, repeat: Infinity, ease: "easeInOut" }} className="relative z-10 flex flex-col items-center cursor-pointer group">
-                <div className="w-11 h-11 rounded-full border-2 overflow-hidden shadow-lg transition-transform group-hover:scale-110" style={{ borderColor: member.color, boxShadow: `0 0 12px ${member.color}40` }}>
+                <div className={`w-11 h-11 rounded-full border-2 overflow-hidden shadow-lg transition-all duration-300 group-hover:scale-110 ${isSpeaking ? 'ring-4 ring-offset-2 ring-emerald-500 scale-110' : ''}`} style={{ borderColor: member.color, boxShadow: `0 0 12px ${member.color}40` }}>
                   {member.avatar ? (
                     <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
                   ) : (

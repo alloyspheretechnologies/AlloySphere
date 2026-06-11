@@ -32,6 +32,8 @@ export interface Profile {
   portfolio_url: string | null;
   linkedin_url: string | null;
   github_url: string | null;
+  resume_url: string | null;
+  certifications_url: string | null;
   onboarding_complete: boolean;
   created_at: string;
   updated_at: string;
@@ -310,6 +312,8 @@ export interface InvestorProfile {
   preferred_industries: string[];
   portfolio_count: number;
   website: string | null;
+  investor_profile_url: string | null;
+  portfolio_overview_url: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -24,7 +24,12 @@ interface SharedDoc {
   isUploading?: boolean;
 }
 
-export function ConferenceChat() {
+interface ChatProps {
+  channel: any;
+  profile: any;
+}
+
+export function ConferenceChat({ channel, profile }: ChatProps) {
   const [activeTab, setActiveTab] = useState<"chat" | "docs">("chat");
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -38,17 +43,45 @@ export function ConferenceChat() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, docs]);
 
+  useEffect(() => {
+    if (!channel) return;
+
+    const messageHandler = (payload: any) => {
+      const { type, data } = payload.payload;
+      if (type === 'chat_message') {
+        setMessages((prev) => [...prev, data]);
+      } else if (type === 'doc_shared') {
+        setDocs((prev) => [data, ...prev]);
+      }
+    };
+
+    channel.on('broadcast', { event: 'conference_activity' }, messageHandler);
+    
+    return () => {
+      channel.off('broadcast', { event: 'conference_activity' }, messageHandler);
+    };
+  }, [channel]);
+
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !profile) return;
     const msg: ChatMessage = {
       id: Date.now().toString(),
-      sender: "You",
+      sender: profile.name || "You",
       text: input.trim(),
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       color: "#8b5cf6",
     };
-    setMessages((prev) => [...prev, msg]);
+    
+    setMessages((prev) => [...prev, { ...msg, sender: "You" }]);
     setInput("");
+
+    if (channel) {
+      channel.send({
+        type: 'broadcast',
+        event: 'conference_activity',
+        payload: { type: 'chat_message', data: msg }
+      });
+    }
   };
 
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,22 +96,44 @@ export function ConferenceChat() {
     ]);
 
     try {
+      // Wait for 1 second for visual feedback (since it's typically very fast)
+      await new Promise(r => setTimeout(r, 1000));
+      
       const { data: profile } = await profileService.getCurrentProfile();
-      const { data, error } = await documentService.uploadDocument(workspace.id, file, undefined, profile?.id);
+      const { data, error, path } = await documentService.uploadDocument(
+        workspace.id,
+        file,
+        undefined,
+        profile?.id,
+        'conference_files'
+      );
 
       if (error || !data) {
         throw new Error(error?.message || "Upload failed");
       }
 
-      setDocs((prev) => prev.map(d => d.id === tempId ? {
+      // Get signed URL for the conference file
+      const { url } = await documentService.getDocumentUrl(path || data.file_url, 'conference_files');
+
+      const newDoc = {
         id: data.id,
         name: data.name,
-        sharedBy: "You",
+        sharedBy: profile?.name || "Someone",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         type: file.name.split(".").pop() || "file",
-        url: data.file_url,
+        url: url || data.file_url,
         isUploading: false
-      } : d));
+      };
+
+      setDocs((prev) => prev.map(d => d.id === tempId ? { ...newDoc, sharedBy: "You" } : d));
+
+      if (channel) {
+        channel.send({
+          type: 'broadcast',
+          event: 'conference_activity',
+          payload: { type: 'doc_shared', data: newDoc }
+        });
+      }
     } catch (e) {
       console.error(e);
       // Remove failed upload
