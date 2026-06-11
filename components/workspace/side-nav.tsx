@@ -21,6 +21,7 @@ export function SideNav() {
       { icon: "home", label: "Home", href: "/home" },
       { icon: "rocket_launch", label: "Startup", href: "/startup" },
       { icon: "grid_view", label: "Workspace", href: "/workspace", isFill: true },
+      { icon: "360", label: "Conference", href: "/workspace/conference", isFill: true },
     ]},
     { section: "Network", items: [
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
