@@ -1,5 +1,6 @@
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import type { Workspace, WorkspaceOverviewView, WorkspaceActivity } from '@/lib/types';
+import { realtimeService } from './realtime.service';
 
 export const workspaceService = {
   /**
@@ -78,21 +79,12 @@ export const workspaceService = {
    * Subscribe to workspace activity (realtime)
    */
   subscribeToActivity(workspaceId: string, callback: (payload: WorkspaceActivity) => void) {
-    const supabase = getSupabaseBrowserClient();
-    const channel = supabase
-      .channel(`workspace-activity-${workspaceId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'workspace_activity',
-          filter: `workspace_id=eq.${workspaceId}`,
-        },
-        (payload) => callback(payload.new as WorkspaceActivity)
-      );
-
-    channel.subscribe();
-    return channel;
+    return realtimeService.subscribeToTableChanges({
+      channelId: `workspace-activity-${workspaceId}`,
+      table: 'workspace_activity',
+      event: 'INSERT',
+      filter: `workspace_id=eq.${workspaceId}`,
+      callback: (payload) => callback(payload.new as WorkspaceActivity)
+    });
   },
 };

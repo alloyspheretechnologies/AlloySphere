@@ -125,7 +125,8 @@ export default function ConferencePage() {
 
   const leaveConference = () => {
     if (channelRef.current) {
-      channelRef.current.unsubscribe();
+      const supabase = getSupabaseBrowserClient();
+      supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
     setIsLive(false);

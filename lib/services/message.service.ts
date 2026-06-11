@@ -1,5 +1,6 @@
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import type { Conversation, Message, MessageInsert } from '@/lib/types';
+import { realtimeService } from './realtime.service';
 
 export const messageService = {
   /**
@@ -178,14 +179,12 @@ export const messageService = {
    * Subscribe to new messages in a conversation (realtime)
    */
   subscribeToMessages(conversationId: string, callback: (message: Message) => void) {
-    const supabase = getSupabaseBrowserClient();
-    return supabase
-      .channel(`messages-${conversationId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
-        (payload) => callback(payload.new as Message)
-      )
-      .subscribe();
+    return realtimeService.subscribeToTableChanges({
+      channelId: `messages-${conversationId}`,
+      table: 'messages',
+      event: 'INSERT',
+      filter: `conversation_id=eq.${conversationId}`,
+      callback: (payload) => callback(payload.new as Message)
+    });
   },
 };

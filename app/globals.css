@@ -132,3 +132,28 @@
   transform-style: preserve-3d;
   transition: transform 0.5s ease;
 }
+
+@layer utilities {
+  /* Mobile Touch Targets */
+  button, a, select, input[type="button"], input[type="submit"] {
+    @apply min-h-[44px];
+  }
+  
+  /* Horizontal scrolling protection */
+  .mobile-no-scroll {
+    @apply max-w-[100vw] overflow-x-hidden;
+  }
+  
+  /* Safe area insets for mobile notches and bottom bars */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 16px);
+  }
+}
+
+html, body {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}

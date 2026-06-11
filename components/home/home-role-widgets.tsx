@@ -35,7 +35,7 @@ export default function HomeRoleWidgets({ role, founderData, talentData, investo
           <span className="material-symbols-outlined text-on-surface-variant">dashboard_customize</span>
           Founder Command Center
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
             <div className="text-xs text-on-surface-variant uppercase mb-1">Applications</div>
             <div className="text-xl font-bold text-white">{founderData.applicationsReceived}</div>
@@ -72,7 +72,7 @@ export default function HomeRoleWidgets({ role, founderData, talentData, investo
           <span className="material-symbols-outlined text-on-surface-variant">dashboard_customize</span>
           Your Activity
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
             <div className="text-xs text-on-surface-variant uppercase mb-1">Applications</div>
             <div className="text-xl font-bold text-white">{talentData.totalApplications}</div>
@@ -131,7 +131,7 @@ export default function HomeRoleWidgets({ role, founderData, talentData, investo
           <span className="material-symbols-outlined text-on-surface-variant">dashboard_customize</span>
           Investment Overview
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
             <div className="text-xs text-on-surface-variant uppercase mb-1">Watchlist</div>
             <div className="text-xl font-bold text-white">{investorData.watchlistCount}</div>

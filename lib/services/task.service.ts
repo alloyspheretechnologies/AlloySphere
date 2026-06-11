@@ -1,5 +1,6 @@
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import type { Task, TaskInsert, TaskUpdate, TaskComment, TaskStatus } from '@/lib/types';
+import { realtimeService } from './realtime.service';
 
 export const taskService = {
   /**
@@ -192,19 +193,12 @@ export const taskService = {
   // ===== Realtime =====
 
   subscribeToTasks(workspaceId: string, callback: (payload: unknown) => void) {
-    const supabase = getSupabaseBrowserClient();
-    return supabase
-      .channel(`tasks-${workspaceId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'tasks',
-          filter: `workspace_id=eq.${workspaceId}`,
-        },
-        callback
-      )
-      .subscribe();
+    return realtimeService.subscribeToTableChanges({
+      channelId: `tasks-${workspaceId}`,
+      table: 'tasks',
+      event: '*',
+      filter: `workspace_id=eq.${workspaceId}`,
+      callback
+    });
   },
 };

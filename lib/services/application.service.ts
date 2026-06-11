@@ -1,5 +1,6 @@
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import type { Application, ApplicationInsert, ApplicationStatus, ApplicationPipelineView } from '@/lib/types';
+import { realtimeService } from './realtime.service';
 
 export const applicationService = {
   async apply(data: ApplicationInsert) {
@@ -101,10 +102,12 @@ export const applicationService = {
   },
 
   subscribeToApplications(startupId: string, callback: (payload: unknown) => void) {
-    const supabase = getSupabaseBrowserClient();
-    return supabase
-      .channel(`applications-${startupId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications', filter: `startup_id=eq.${startupId}` }, callback)
-      .subscribe();
+    return realtimeService.subscribeToTableChanges({
+      channelId: `applications-${startupId}`,
+      table: 'applications',
+      event: '*',
+      filter: `startup_id=eq.${startupId}`,
+      callback
+    });
   },
 };

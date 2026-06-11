@@ -190,16 +190,20 @@ export default function FeedPage() {
               <div key={post.id} className="glass-panel p-6 rounded-2xl border border-white/10 holographic-lift">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    {post.author?.avatar_url ? (
-                      <img src={post.author.avatar_url} alt="" className="w-10 h-10 rounded-xl object-cover border border-white/10" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm font-bold text-white">
-                        {(post.author?.name || "U").substring(0, 2).toUpperCase()}
-                      </div>
-                    )}
+                    <Link href={`/${post.author?.role === 'investor' ? 'investor' : post.author?.role === 'talent' ? 'talent' : 'profile'}/${post.author?.id}`}>
+                      {post.author?.avatar_url ? (
+                        <img src={post.author.avatar_url} alt="" className="w-10 h-10 rounded-xl object-cover border border-white/10 hover:border-white/30 transition-colors" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm font-bold text-white hover:border-white/30 transition-colors">
+                          {(post.author?.name || "U").substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                    </Link>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-bold text-white">{post.author?.name}</span>
+                        <Link href={`/${post.author?.role === 'investor' ? 'investor' : post.author?.role === 'talent' ? 'talent' : 'profile'}/${post.author?.id}`} className="text-base font-bold text-white hover:underline">
+                          {post.author?.name}
+                        </Link>
                         {post.startup && (
                           <Link href={`/startup/${post.startup.slug}`} className="text-xs bg-white/10 text-white px-2 py-0.5 rounded font-medium hover:bg-white/20 transition-colors">
                             {post.startup.name}
@@ -268,16 +272,20 @@ export default function FeedPage() {
                     <div className="space-y-4 mb-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
                       {comments.length > 0 ? comments.map((comment) => (
                         <div key={comment.id} className="flex gap-3">
-                          {comment.author?.avatar_url ? (
-                            <img src={comment.author.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover border border-white/10 shrink-0" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                              {(comment.author?.name || "U").substring(0, 2).toUpperCase()}
-                            </div>
-                          )}
+                          <Link href={`/${comment.author?.role === 'investor' ? 'investor' : comment.author?.role === 'talent' ? 'talent' : 'profile'}/${comment.author?.id}`}>
+                            {comment.author?.avatar_url ? (
+                              <img src={comment.author.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover border border-white/10 shrink-0 hover:border-white/30 transition-colors" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0 hover:border-white/30 transition-colors">
+                                {(comment.author?.name || "U").substring(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                          </Link>
                           <div className="flex-1 bg-surface-container-high/50 rounded-xl p-3 border border-white/5">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-bold text-white">{comment.author?.name}</span>
+                              <Link href={`/${comment.author?.role === 'investor' ? 'investor' : comment.author?.role === 'talent' ? 'talent' : 'profile'}/${comment.author?.id}`} className="text-sm font-bold text-white hover:underline">
+                                {comment.author?.name}
+                              </Link>
                               <span className="text-[10px] text-on-surface-variant">{new Date(comment.created_at).toLocaleDateString()}</span>
                             </div>
                             <p className="text-sm text-on-surface-variant whitespace-pre-wrap">{comment.content}</p>

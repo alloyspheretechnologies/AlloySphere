@@ -19,43 +19,34 @@ export const realtimeService = {
     const supabase = getSupabaseBrowserClient();
     const { channelId, schema = 'public', table, event = '*', filter, callback } = options;
 
-    // Remove existing channel if it exists to ensure clean subscription
-    if (channelRegistry.has(channelId)) {
-      const existingChannel = channelRegistry.get(channelId);
-      if (existingChannel) {
-        supabase.removeChannel(existingChannel);
-      }
-      channelRegistry.delete(channelId);
+    let channel = channelRegistry.get(channelId);
+    let isNewChannel = false;
+
+    if (!channel) {
+      channel = supabase.channel(channelId);
+      isNewChannel = true;
+      channelRegistry.set(channelId, channel);
     }
 
-    const channel = supabase.channel(channelId);
+    // Add specific listener
+    channel.on(
+      'postgres_changes',
+      // @ts-ignore
+      { event, schema, table, filter },
+      (payload) => callback(payload)
+    );
 
-    channel
-      .on(
-        'postgres_changes',
-        // @ts-ignore - Supabase types are sometimes strict about event strings
-        { event, schema, table, filter },
-        (payload) => {
-          callback(payload);
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          // Successfully subscribed
-        } else if (status === 'CLOSED') {
-          // Channel closed
-        } else if (status === 'CHANNEL_ERROR') {
-          // Handle error, maybe implement retry logic here
-          console.error(`[Realtime] Error on channel ${channelId}`);
+    if (isNewChannel) {
+      channel.subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error(`[Realtime] Error on channel ${channelId}`, err);
         }
       });
+    }
 
-    channelRegistry.set(channelId, channel);
-
-    // Return a cleanup function
     return () => {
-      supabase.removeChannel(channel);
-      channelRegistry.delete(channelId);
+      // Intentionally NOT destroying the channel on unmount to prevent websocket flapping
+      // We rely on unsubscribeAll during logout to clean up.
     };
   },
 
@@ -70,13 +61,14 @@ export const realtimeService = {
     const supabase = getSupabaseBrowserClient();
     const channelId = `startup-engagement-${startupId}`;
 
-    if (channelRegistry.has(channelId)) {
-      const existingChannel = channelRegistry.get(channelId);
-      if (existingChannel) supabase.removeChannel(existingChannel);
-      channelRegistry.delete(channelId);
-    }
+    let channel = channelRegistry.get(channelId);
+    let isNewChannel = false;
 
-    const channel = supabase.channel(channelId);
+    if (!channel) {
+      channel = supabase.channel(channelId);
+      isNewChannel = true;
+      channelRegistry.set(channelId, channel);
+    }
 
     if (callbacks.onLike) {
       channel.on('postgres_changes', { event: '*', schema: 'public', table: 'startup_likes', filter: `startup_id=eq.${startupId}` }, callbacks.onLike);
@@ -90,12 +82,16 @@ export const realtimeService = {
       channel.on('postgres_changes', { event: '*', schema: 'public', table: 'startup_rankings', filter: `startup_id=eq.${startupId}` }, callbacks.onRankingUpdate);
     }
 
-    channel.subscribe();
-    channelRegistry.set(channelId, channel);
+    if (isNewChannel) {
+      channel.subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error(`[Realtime] Error on channel ${channelId}`, err);
+        }
+      });
+    }
 
     return () => {
-      supabase.removeChannel(channel);
-      channelRegistry.delete(channelId);
+      // Do not aggressively tear down channels
     };
   },
 

@@ -1,5 +1,6 @@
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { sanitizeSearchInput } from '@/lib/utils';
+import { safeQuery } from '@/lib/utils/safe-query';
 import type { Startup, StartupInsert, StartupUpdate, StartupMember, StartupDashboardView } from '@/lib/types';
 
 export const startupService = {
@@ -22,11 +23,10 @@ export const startupService = {
    */
   async getStartup(startupId: string) {
     const supabase = getSupabaseBrowserClient();
-    const { data, error } = await supabase
-      .from('startups')
-      .select('*')
-      .eq('id', startupId)
-      .single();
+    const { data, error } = await safeQuery(
+      supabase.from('startups').select('*').eq('id', startupId).single(),
+      { context: 'getStartup', retries: 1 }
+    );
 
     return { data: data as Startup | null, error };
   },
@@ -36,11 +36,10 @@ export const startupService = {
    */
   async getStartupBySlug(slug: string) {
     const supabase = getSupabaseBrowserClient();
-    const { data, error } = await supabase
-      .from('startups')
-      .select('*')
-      .eq('slug', slug)
-      .single();
+    const { data, error } = await safeQuery(
+      supabase.from('startups').select('*').eq('slug', slug).single(),
+      { context: 'getStartupBySlug', retries: 1 }
+    );
 
     return { data: data as Startup | null, error };
   },
@@ -122,11 +121,10 @@ export const startupService = {
    */
   async getStartupDashboard(startupId: string) {
     const supabase = getSupabaseBrowserClient();
-    const { data, error } = await supabase
-      .from('startup_dashboard_view')
-      .select('*')
-      .eq('id', startupId)
-      .single();
+    const { data, error } = await safeQuery(
+      supabase.from('startup_dashboard_view').select('*').eq('id', startupId).single(),
+      { context: 'getStartupDashboard', retries: 1 }
+    );
 
     return { data: data as StartupDashboardView | null, error };
   },
