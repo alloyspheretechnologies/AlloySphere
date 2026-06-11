@@ -17,7 +17,7 @@ export default function LandingPage() {
           <Link href="/login" className="text-sm font-semibold text-on-surface-variant hover:text-white transition-colors">
             Sign In
           </Link>
-          <Link href="/login" className="px-5 py-2 glass-panel text-white rounded-lg font-semibold hover:bg-white/10 transition-all btn-glow border border-white/20 text-sm">
+          <Link href="/role-selection" className="px-5 py-2 glass-panel text-white rounded-lg font-semibold hover:bg-white/10 transition-all btn-glow border border-white/20 text-sm">
             Sign Up
           </Link>
         </div>
@@ -41,7 +41,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-12">
             <Link 
-              href="/login"
+              href="/role-selection"
               className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] w-full sm:w-auto"
             >
               Start Building

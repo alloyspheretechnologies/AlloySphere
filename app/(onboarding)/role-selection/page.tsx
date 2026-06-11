@@ -5,6 +5,7 @@ import { profileService } from "@/lib/services/profile.service";
 import { useEffect, useState } from "react";
 import type { Profile } from "@/lib/types";
 import { useAuthStore } from "@/lib/store/useAuthStore";
+import { authService } from "@/lib/services/auth.service";
 
 export default function RoleSelectionPage() {
   const router = useRouter();
@@ -15,21 +16,31 @@ export default function RoleSelectionPage() {
 
   useEffect(() => {
     profileService.getCurrentProfile().then(({ data }) => {
-      if (!data) router.push("/login");
-      else if (data.onboarding_complete) router.push("/dashboard");
-      else if (document.cookie.includes("role_selected=true")) router.push("/onboarding");
-      else setProfile(data);
+      if (data) {
+        if (data.onboarding_complete) router.push("/dashboard");
+        else if (document.cookie.includes("role_selected=true")) router.push("/onboarding");
+        else setProfile(data);
+      }
     });
   }, [router]);
 
   const selectRole = async (selectedRole: "founder" | "talent" | "investor") => {
-    if (!profile || !user) return;
     setLoading(true);
-    await profileService.setRole(user.id, selectedRole);
-    await syncSession();
+    // Store pending role in cookie for the auth callback
+    document.cookie = `pending_role=${selectedRole}; path=/; max-age=3600`;
     // Set a cookie so middleware knows we have explicitly selected a role
     document.cookie = "role_selected=true; path=/; max-age=31536000";
-    router.push("/onboarding");
+
+    const { user: currentUser } = await authService.getUser();
+
+    if (currentUser) {
+      await profileService.setRole(currentUser.id, selectedRole);
+      await syncSession();
+      router.push("/onboarding");
+    } else {
+      // Trigger Google Auth if not logged in
+      await authService.signInWithGoogle(`${window.location.origin}/auth/callback`);
+    }
   };
 
   return (
