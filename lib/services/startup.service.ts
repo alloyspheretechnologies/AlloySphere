@@ -146,6 +146,20 @@ export const startupService = {
   // ===== Members =====
 
   /**
+   * Get startups where the user is an active member
+   */
+  async getMyMemberships(profileId: string) {
+    const supabase = getSupabaseBrowserClient();
+    const { data, error } = await supabase
+      .from('startup_members')
+      .select('startup_id, role, status, startup:startups(*)')
+      .eq('user_id', profileId)
+      .eq('status', 'active');
+      
+    return { data: data ?? [], error };
+  },
+
+  /**
    * Get members of a startup
    */
   async getMembers(startupId: string) {

@@ -4,14 +4,27 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { profileService } from "@/lib/services/profile.service";
+import { startupService } from "@/lib/services/startup.service";
 
 export function SideNav() {
   const pathname = usePathname();
   const [role, setRole] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasStartup, setHasStartup] = useState(false);
 
   useEffect(() => {
-    profileService.getCurrentProfile().then(({ data }) => setRole(data?.role || null));
+    profileService.getCurrentProfile().then(async ({ data }) => {
+      if (data) {
+        setRole(data.role || null);
+        
+        if (data.role !== 'founder') {
+          const { data: memberships } = await startupService.getMyMemberships(data.id);
+          if (memberships && memberships.length > 0) {
+            setHasStartup(true);
+          }
+        }
+      }
+    });
     // Mock unread
     setUnreadCount(3);
   }, []);
@@ -36,6 +49,7 @@ export function SideNav() {
       { icon: "explore", label: "Discover Startups", href: "/discover" },
       { icon: "work", label: "Opportunities", href: "/jobs" },
       { icon: "description", label: "Applications", href: "/applications" },
+      ...(hasStartup ? [{ icon: "360", label: "Conference", href: "/workspace/conference", isFill: true }] : []),
     ]},
     { section: "Network", items: [
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
@@ -48,6 +62,7 @@ export function SideNav() {
       { icon: "explore", label: "Discover Startups", href: "/discover" },
       { icon: "account_balance_wallet", label: "Portfolio", href: "/investments" },
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
+      ...(hasStartup ? [{ icon: "360", label: "Conference", href: "/workspace/conference", isFill: true }] : []),
     ]}
   ];
 
