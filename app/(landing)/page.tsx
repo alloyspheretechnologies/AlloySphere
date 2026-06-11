@@ -14,10 +14,10 @@ export default function LandingPage() {
           <span className="font-bold text-lg text-white">AlloySphere</span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-semibold text-on-surface-variant hover:text-white transition-colors">
+          <Link href="/login" className="text-sm font-semibold text-on-surface-variant hover:text-white transition-colors h-10 flex items-center">
             Sign In
           </Link>
-          <Link href="/role-selection" className="px-5 py-2 glass-panel text-white rounded-lg font-semibold hover:bg-white/10 transition-all btn-glow border border-white/20 text-sm">
+          <Link href="/role-selection" className="px-5 h-10 flex items-center justify-center glass-panel text-white rounded-lg font-semibold hover:bg-white/10 transition-all btn-glow border border-white/20 text-sm">
             Sign Up
           </Link>
         </div>
