@@ -50,7 +50,15 @@ function ParticleNetwork() {
 export function ThreeBackground() {
   return (
     <div className="fixed inset-0 z-[-1] pointer-events-none bg-black">
-      <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
+      <Canvas 
+        camera={{ position: [0, 0, 15], fov: 60 }} 
+        dpr={[1, 2]} 
+        gl={{ powerPreference: 'high-performance', antialias: false }}
+        onCreated={(state) => {
+          // Explicit cleanup handler on unmount
+          state.gl.setClearColor('#000000');
+        }}
+      >
         <fog attach="fog" args={['#000000', 5, 25]} />
         <ParticleNetwork />
       </Canvas>

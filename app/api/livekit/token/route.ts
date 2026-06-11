@@ -25,23 +25,27 @@ export async function POST(req: Request) {
 
     const participantName = profile?.name || user.email || 'Anonymous';
 
-    const apiKey = process.env.LIVEKIT_API_KEY;
-    const apiSecret = process.env.LIVEKIT_API_SECRET;
-    const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || "wss://alloysphere-producion-qf6vkz13.livekit.cloud";
+    const apiKey = process.env.LIVEKIT_API_KEY?.trim();
+    const apiSecret = process.env.LIVEKIT_API_SECRET?.trim();
+    const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL?.trim() || "wss://alloysphere-producion-qf6vkz13.livekit.cloud";
 
     if (!apiKey || !apiSecret || !wsUrl) {
-      console.error("LiveKit environment variables are missing");
+      console.error("[LiveKit] Environment variables are missing or empty.");
       return NextResponse.json({ error: 'LiveKit configuration error' }, { status: 500 });
     }
+
+    console.log(`[LiveKit] Generating token for Room: ${roomName}, Identity: ${user.id}, Name: ${participantName}`);
 
     const at = new AccessToken(apiKey, apiSecret, {
       identity: user.id,
       name: participantName,
+      ttl: 3600, // 1 hour token validity
     });
 
     at.addGrant({ roomJoin: true, room: roomName, canPublish: true, canSubscribe: true });
 
     const token = await at.toJwt();
+    console.log(`[LiveKit] Successfully generated JWT token for ${user.id}`);
 
     return NextResponse.json({ token });
   } catch (error: any) {

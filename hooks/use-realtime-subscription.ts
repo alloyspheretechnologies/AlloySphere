@@ -14,7 +14,7 @@ interface SubscriptionOptions {
 }
 
 // Global registry to prevent duplicate subscriptions across components
-const activeChannels = new Map<string, RealtimeChannel>();
+const activeChannels = new Map<string, { channel: RealtimeChannel; listeners: number }>();
 
 export function useRealtimeSubscription({
   table,
@@ -35,12 +35,15 @@ export function useRealtimeSubscription({
     const supabase = getSupabaseBrowserClient();
     const topic = channelName || `realtime:${schema}:${table}${filter ? `:${filter}` : ""}`;
     
-    let channel = activeChannels.get(topic);
+    let activeData = activeChannels.get(topic);
+    
+    // Create a unique binding reference for this hook instance
+    let bindingRef: any = null;
 
-    if (!channel) {
-      channel = supabase.channel(topic);
+    if (!activeData) {
+      const channel = supabase.channel(topic);
       
-      channel.on(
+      bindingRef = channel.on(
         "postgres_changes",
         {
           event,
@@ -55,7 +58,7 @@ export function useRealtimeSubscription({
         }
       );
 
-      // Handle reconnects and errors
+      // Handle reconnects and errors with backoff logic (handled implicitly by Supabase client, but we log it)
       channel.subscribe((status, err) => {
         if (status === "SUBSCRIBED") {
           console.log(`[Realtime] Subscribed to ${topic}`);
@@ -63,13 +66,18 @@ export function useRealtimeSubscription({
           console.log(`[Realtime] Closed ${topic}`);
         } else if (status === "CHANNEL_ERROR") {
           console.error(`[Realtime] Error in ${topic}:`, err);
+          // Optional: implement manual reconnect logic here if needed, 
+          // but Supabase realtime handles automatic reconnects.
         }
       });
 
-      activeChannels.set(topic, channel);
+      activeChannels.set(topic, { channel, listeners: 1 });
+      activeData = activeChannels.get(topic);
     } else {
-      // If channel already exists, we just add another listener to the existing channel
-      channel.on(
+      // If channel already exists, increment listener count
+      activeData.listeners += 1;
+      
+      bindingRef = activeData.channel.on(
         "postgres_changes",
         {
           event,
@@ -86,12 +94,22 @@ export function useRealtimeSubscription({
     }
 
     return () => {
-      // In a strict cleanup, we might remove the specific listener.
-      // But for simplicity with Supabase, if a component unmounts, we can just leave the singleton channel active
-      // or implement ref-counting. 
-      // A common source of errors is aggressively destroying channels that other components need.
-      // We will rely on Supabase's automatic handling for now, or just remove the channel if we want to be strict.
-      // To prevent "channel closed" errors randomly, we won't unsubscribe the global channel here.
+      const currentData = activeChannels.get(topic);
+      if (currentData) {
+        currentData.listeners -= 1;
+        
+        // Remove this specific listener
+        if (bindingRef) {
+           // We'd ideally call remove binding, but Supabase SDK doesn't expose it easily for postgres_changes
+           // Instead we just let the channel be destroyed if listeners = 0
+        }
+
+        if (currentData.listeners <= 0) {
+          // If no one is listening to this topic anymore, destroy it cleanly
+          supabase.removeChannel(currentData.channel);
+          activeChannels.delete(topic);
+        }
+      }
     };
   }, [table, schema, event, filter, channelName]);
 }
