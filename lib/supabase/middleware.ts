@@ -2,6 +2,14 @@ import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
+  // If a Supabase OAuth redirect lands on the root (e.g. missing callback URL in Supabase config)
+  // catch the code and forward it to our callback route to properly finish auth.
+  if (request.nextUrl.searchParams.has('code') && !request.nextUrl.pathname.startsWith('/auth/callback')) {
+    const callbackUrl = request.nextUrl.clone();
+    callbackUrl.pathname = '/auth/callback';
+    return NextResponse.redirect(callbackUrl);
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

@@ -9,9 +9,11 @@ import InvestorWizard from "@/components/onboarding/investor-wizard";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { isAuthenticated, role, onboardingComplete } = useAuthStore();
+  const { isAuthenticated, role, onboardingComplete, loading } = useAuthStore();
 
   useEffect(() => {
+    if (loading) return; // Wait for session sync
+    
     if (!isAuthenticated) {
       router.push("/login");
     } else if (!role) {
@@ -19,7 +21,7 @@ export default function OnboardingPage() {
     } else if (onboardingComplete) {
       router.push("/dashboard");
     }
-  }, [isAuthenticated, role, onboardingComplete, router]);
+  }, [isAuthenticated, role, onboardingComplete, loading, router]);
 
   if (!role || onboardingComplete) return null;
 
