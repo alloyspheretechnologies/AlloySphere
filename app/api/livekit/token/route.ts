@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
     const apiKey = process.env.LIVEKIT_API_KEY;
     const apiSecret = process.env.LIVEKIT_API_SECRET;
-    const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+    const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || "wss://alloysphere-producion-qf6vkz13.livekit.cloud";
 
     if (!apiKey || !apiSecret || !wsUrl) {
       console.error("LiveKit environment variables are missing");

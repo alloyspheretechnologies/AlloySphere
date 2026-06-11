@@ -116,10 +116,13 @@ export default function ConferencePage() {
         setLiveKitToken(data.token);
       } else {
         console.error("Failed to fetch LiveKit token:", data.error);
-        alert("Failed to connect to audio server.");
+        alert("Failed to connect to audio server. Check your environment variables.");
+        leaveConference();
       }
     } catch (err) {
       console.error("LiveKit connection error:", err);
+      alert("Failed to connect to audio server.");
+      leaveConference();
     }
   };
 
@@ -190,7 +193,7 @@ export default function ConferencePage() {
                 video={false}
                 audio={!isMuted}
                 token={liveKitToken}
-                serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
+                serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || "wss://alloysphere-producion-qf6vkz13.livekit.cloud"}
                 // Use default connect options
                 connect={true}
               >
@@ -198,7 +201,9 @@ export default function ConferencePage() {
                 <RoomAudioRenderer />
               </LiveKitRoom>
             ) : (
-              <ConferenceScene members={participants} isMuted={isMuted} isScreenSharing={isScreenSharing} />
+              <div className="flex w-full h-full items-center justify-center">
+                <div className="w-8 h-8 border-2 border-indigo-500/50 border-t-indigo-400 rounded-full animate-spin" />
+              </div>
             )}
           </div>
 
