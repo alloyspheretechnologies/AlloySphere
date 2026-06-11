@@ -27,6 +27,7 @@ export function NotificationCenter() {
   useRealtimeSubscription({
     table: "notifications",
     filter: profile ? `user_id=eq.${profile.id}` : undefined,
+    enabled: !!profile,
     onData: (payload) => {
       if (profile && payload.new) {
         setNotifications((prev) => [payload.new, ...prev]);

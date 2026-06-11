@@ -11,6 +11,7 @@ interface SubscriptionOptions {
   filter?: string;
   onData: (payload: any) => void;
   channelName?: string;
+  enabled?: boolean;
 }
 
 // Global registry to prevent duplicate subscriptions across components
@@ -23,6 +24,7 @@ export function useRealtimeSubscription({
   filter,
   onData,
   channelName,
+  enabled = true,
 }: SubscriptionOptions) {
   const onDataRef = useRef(onData);
 
@@ -32,6 +34,8 @@ export function useRealtimeSubscription({
   }, [onData]);
 
   useEffect(() => {
+    if (!enabled) return;
+
     const supabase = getSupabaseBrowserClient();
     const topic = channelName || `realtime:${schema}:${table}${filter ? `:${filter}` : ""}`;
     
