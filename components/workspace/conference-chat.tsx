@@ -46,7 +46,10 @@ export function ConferenceChat({ channel, profile }: ChatProps) {
   useEffect(() => {
     if (!channel) return;
 
+    let isMounted = true;
+
     const messageHandler = (payload: any) => {
+      if (!isMounted) return;
       const { type, data } = payload.payload;
       if (type === 'chat_message') {
         setMessages((prev) => [...prev, data]);
@@ -55,10 +58,11 @@ export function ConferenceChat({ channel, profile }: ChatProps) {
       }
     };
 
+    // Supabase RealtimeChannel does not have a public .off() method
     channel.on('broadcast', { event: 'conference_activity' }, messageHandler);
     
     return () => {
-      channel.off('broadcast', { event: 'conference_activity' }, messageHandler);
+      isMounted = false;
     };
   }, [channel]);
 
