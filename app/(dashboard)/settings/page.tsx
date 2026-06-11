@@ -95,13 +95,21 @@ export default function SettingsPage() {
     if (!confirm("Are you sure you want to completely delete your account? This action CANNOT be undone.")) return;
     setSigningOut(true);
     try {
-      // In a real production app, this would call an edge function or secure backend
-      // endpoint to delete the user from auth.users (which would cascade to profiles).
-      // Since we don't have a backend endpoint right now, we will simulate it
-      // by signing them out and clearing the local session.
+      // Call our secure backend endpoint to delete the user from auth.users
+      const res = await fetch('/api/auth/delete-account', {
+        method: 'POST',
+      });
+      
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete account");
+      }
+
+      // Then clear the local session and redirect
       await logout();
     } catch (e) {
       console.error(e);
+      alert("Failed to delete account. Please try again or contact support.");
       setSigningOut(false);
     }
   };
