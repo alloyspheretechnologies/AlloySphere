@@ -97,8 +97,8 @@ export default function WorkspacePage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Projects", value: projects.length, icon: "folder", href: "/workspace/projects" },
-          { label: "Active", value: activeProjects, icon: "play_circle", href: "/workspace/projects" },
+          { label: "Projects", value: projects.length, icon: "folder", href: "/workspace/roadmap" },
+          { label: "Active", value: activeProjects, icon: "play_circle", href: "/workspace/roadmap" },
           { label: "In Progress", value: inProgressTasks, icon: "pending", href: "/workspace/tasks" },
           { label: "Completed", value: completedTasks, icon: "task_alt", href: "/workspace/tasks" },
         ].map((stat) => (
@@ -179,7 +179,7 @@ export default function WorkspacePage() {
           </h3>
           <div className="space-y-3">
             {projects.length > 0 ? projects.slice(0, 4).map((proj: any, i: number) => (
-              <Link key={proj.id || i} href={`/workspace/projects/${proj.id}`}
+              <Link key={proj.id || i} href={`/workspace/roadmap`}
                 className="block bg-surface-container-high/50 p-3 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                 <div className="flex justify-between items-start mb-2">
                   <p className="text-sm text-white font-medium">{proj.name}</p>
@@ -198,7 +198,7 @@ export default function WorkspacePage() {
               <p className="text-sm text-on-surface-variant text-center py-4">No projects yet</p>
             )}
           </div>
-          <Link href="/workspace/projects" className="mt-4 w-full py-2 border border-white/10 rounded-lg text-sm text-white hover:bg-white/5 transition-colors text-center block">
+          <Link href="/workspace/roadmap" className="mt-4 w-full py-2 border border-white/10 rounded-lg text-sm text-white hover:bg-white/5 transition-colors text-center block">
             View All Projects
           </Link>
         </div>

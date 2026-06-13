@@ -41,6 +41,7 @@ export function FeedbackWidget() {
         setMessage('');
       }, 2000);
     } else {
+      console.error("[Feedback] Submission failed:", error);
       alert("Failed to submit feedback. Please try again.");
     }
   };
