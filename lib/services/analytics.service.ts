@@ -36,9 +36,14 @@ class AnalyticsService {
 
   init() {
     if (typeof window !== 'undefined' && !this.isInitialized) {
-      const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY || 'phc_placeholder';
+      const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
       const apiHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com';
       
+      // Skip initialization if no real API key is configured
+      if (!apiKey || apiKey === 'phc_placeholder') {
+        return;
+      }
+
       posthog.init(apiKey, {
         api_host: apiHost,
         loaded: () => {
@@ -51,17 +56,17 @@ class AnalyticsService {
   }
 
   identify(userId: string, traits?: Record<string, any>) {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !this.isInitialized) return;
     posthog.identify(userId, traits);
   }
 
   track(event: AnalyticsEvent, properties?: Record<string, any>) {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !this.isInitialized) return;
     posthog.capture(event, properties);
   }
 
   reset() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !this.isInitialized) return;
     posthog.reset();
   }
 }

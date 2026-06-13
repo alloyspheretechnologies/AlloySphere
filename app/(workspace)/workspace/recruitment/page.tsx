@@ -130,16 +130,20 @@ export default function RecruitmentPage() {
                   className="glass-panel p-4 rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer holographic-lift">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
-                        {(app.applicant_name || "U").substring(0, 2).toUpperCase()}
-                      </div>
+                      {app.applicant?.avatar_url ? (
+                        <img src={app.applicant.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover border border-white/10" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
+                          {(app.applicant?.name || "U").substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
                       <div>
-                        <div className="text-sm font-bold text-white leading-tight">{app.applicant_name}</div>
+                        <div className="text-sm font-bold text-white leading-tight">{app.applicant?.name || "Unknown"}</div>
                         <div className="text-[10px] text-on-surface-variant">{new Date(app.applied_at || app.created_at).toLocaleDateString()}</div>
                       </div>
                     </div>
                   </div>
-                  <div className="text-xs font-medium text-white mb-2">{app.opportunity_title}</div>
+                  <div className="text-xs font-medium text-white mb-2">{app.opportunity?.title}</div>
                   {app.cover_letter && <p className="text-[10px] text-on-surface-variant line-clamp-2 border-t border-white/5 pt-2">{app.cover_letter}</p>}
                 </div>
               ))}
@@ -156,12 +160,12 @@ export default function RecruitmentPage() {
             {applications.filter(a => a.status === "accepted" || a.status === "rejected").slice(0, 10).map((app: any) => (
               <div key={app.id} className="glass-panel p-4 rounded-xl border border-white/5">
                 <div className="flex justify-between items-center">
-                  <div className="text-sm font-medium text-white">{app.applicant_name}</div>
+                  <div className="text-sm font-medium text-white">{app.applicant?.name || "Unknown"}</div>
                   <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
                     app.status === "accepted" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
                   }`}>{app.status}</span>
                 </div>
-                <div className="text-xs text-on-surface-variant mt-1">{app.opportunity_title}</div>
+                <div className="text-xs text-on-surface-variant mt-1">{app.opportunity?.title}</div>
               </div>
             ))}
           </div>
@@ -216,14 +220,32 @@ export default function RecruitmentPage() {
         {selectedApp && (
           <div className="p-6 space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-bold text-white">
-                {(selectedApp.applicant_name || "U").substring(0, 2).toUpperCase()}
-              </div>
+              {selectedApp.applicant?.avatar_url ? (
+                <img src={selectedApp.applicant.avatar_url} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/10" />
+              ) : (
+                <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-bold text-white">
+                  {(selectedApp.applicant?.name || "U").substring(0, 2).toUpperCase()}
+                </div>
+              )}
               <div>
-                <h2 className="text-xl font-bold text-white">{selectedApp.applicant_name}</h2>
-                <p className="text-sm text-on-surface-variant">Applied for: <span className="text-white font-medium">{selectedApp.opportunity_title}</span></p>
+                <h2 className="text-xl font-bold text-white">{selectedApp.applicant?.name || "Unknown"}</h2>
+                {selectedApp.applicant?.headline && (
+                  <p className="text-xs text-on-surface-variant">{selectedApp.applicant.headline}</p>
+                )}
+                <p className="text-sm text-on-surface-variant mt-0.5">Applied for: <span className="text-white font-medium">{selectedApp.opportunity?.title}</span></p>
               </div>
             </div>
+
+            {selectedApp.applicant?.skills && selectedApp.applicant.skills.length > 0 && (
+              <div>
+                <h3 className="text-sm font-bold text-white mb-2">Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedApp.applicant.skills.map((skill: string) => (
+                    <span key={skill} className="bg-white/5 text-on-surface-variant text-xs px-2.5 py-1 rounded-lg border border-white/5">{skill}</span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-2">
               {["applied", "reviewing", "interview"].map(s => (

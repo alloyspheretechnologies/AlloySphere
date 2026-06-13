@@ -1,9 +1,13 @@
 import { createBrowserClient } from '@supabase/ssr';
 
 export function createClient() {
+  // Trim env vars to prevent trailing whitespace/newlines from corrupting WebSocket URLs
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!.trim();
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!.trim();
+
   return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       realtime: {
         params: {
