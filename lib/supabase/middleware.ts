@@ -46,9 +46,32 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If user is authenticated, check onboarding status for core app routes
+  // If user is authenticated, handle routing
   if (user) {
-    const isAppRoute = !['/login', '/role-selection', '/onboarding'].some(path => request.nextUrl.pathname.startsWith(path));
+    // If authenticated user visits /login, figure out where to send them
+    if (request.nextUrl.pathname === '/login') {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, onboarding_complete')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profile?.onboarding_complete) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/dashboard';
+        return NextResponse.redirect(url);
+      }
+
+      const hasSelectedRole = request.cookies.has('role_selected');
+      const url = request.nextUrl.clone();
+      url.pathname = hasSelectedRole ? '/onboarding' : '/role-selection';
+      return NextResponse.redirect(url);
+    }
+
+    // For core app routes (excluding auth-flow pages, landing, and API routes), enforce onboarding
+    const excludedPaths = ['/login', '/role-selection', '/onboarding', '/auth', '/api'];
+    const isAppRoute = !excludedPaths.some(path => request.nextUrl.pathname.startsWith(path))
+      && request.nextUrl.pathname !== '/';
     
     if (isAppRoute) {
       const { data: profile } = await supabase
@@ -71,13 +94,6 @@ export async function updateSession(request: NextRequest) {
           return NextResponse.redirect(url);
         }
       }
-    }
-
-    // If user is authenticated and visits login, redirect to dashboard
-    if (request.nextUrl.pathname === '/login') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
     }
   }
 

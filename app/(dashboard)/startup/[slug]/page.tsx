@@ -330,11 +330,36 @@ export default function StartupProfilePage() {
 
       {activeTab === "opportunities" && (
         <div className="space-y-4 animate-in fade-in">
+          {profile?.id === startup.owner_id && (
+            <div className="flex items-center justify-between glass-panel p-4 rounded-xl border border-white/5 mb-2">
+              <span className="text-sm text-on-surface-variant">You can manage and remove roles you&apos;ve posted.</span>
+            </div>
+          )}
           {opportunities.length > 0 ? opportunities.map((opp: any) => (
             <div key={opp.id} className="glass-panel p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all">
               <div className="flex justify-between items-start mb-3">
                 <h3 className="text-lg font-bold text-white">{opp.title}</h3>
-                <span className={`text-[10px] uppercase px-2 py-1 rounded font-bold ${opp.status === "open" ? "bg-emerald-500/20 text-emerald-400" : "bg-white/5 text-on-surface-variant"}`}>{opp.status}</span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] uppercase px-2 py-1 rounded font-bold ${opp.status === "open" ? "bg-emerald-500/20 text-emerald-400" : "bg-white/5 text-on-surface-variant"}`}>{opp.status}</span>
+                  {profile?.id === startup.owner_id && (
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`Are you sure you want to delete the role "${opp.title}"? This action cannot be undone.`)) return;
+                        const { error } = await opportunityService.deleteOpportunity(opp.id);
+                        if (error) {
+                          console.error("[DeleteOpportunity]", error);
+                          alert("Failed to delete opportunity. Please try again.");
+                        } else {
+                          setOpportunities(prev => prev.filter(o => o.id !== opp.id));
+                        }
+                      }}
+                      className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      title="Delete this role"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                  )}
+                </div>
               </div>
               {opp.description && <p className="text-sm text-on-surface-variant mb-4 line-clamp-2">{opp.description}</p>}
               <div className="flex flex-wrap gap-2 mb-4">

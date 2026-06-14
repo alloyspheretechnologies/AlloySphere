@@ -1,21 +1,35 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useState, useEffect } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { usePathname } from 'next/navigation';
 
 export function FeedbackWidget() {
-  const { user } = useAuthStore();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<'bug' | 'feature_request' | 'ux_issue' | 'general'>('bug');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check auth status directly from Supabase (not auth store) to avoid hydration timing issues
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsAuthenticated(!!user);
+    });
+
+    // Also listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Don't show to unauthenticated users
-  if (!user) return null;
+  if (!isAuthenticated) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +38,16 @@ export function FeedbackWidget() {
     setIsSubmitting(true);
     const supabase = getSupabaseBrowserClient();
     
+    // Get the user directly at submit time for reliable auth.uid() matching
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (!user || authError) {
+      console.error("[Feedback] Auth error — user not found:", authError);
+      alert("You must be signed in to submit feedback. Please refresh and try again.");
+      setIsSubmitting(false);
+      return;
+    }
+
     const { error } = await supabase.from('platform_feedback').insert({
       user_id: user.id,
       type,
@@ -41,7 +65,7 @@ export function FeedbackWidget() {
         setMessage('');
       }, 2000);
     } else {
-      console.error("[Feedback] Submission failed:", error);
+      console.error("[Feedback] Submission failed:", error.message, error.details, error.hint);
       alert("Failed to submit feedback. Please try again.");
     }
   };
@@ -116,3 +140,4 @@ export function FeedbackWidget() {
     </div>
   );
 }
+
