@@ -20,15 +20,15 @@ export function TopNav() {
 
   return (
     <>
-      <nav className="bg-background/80 backdrop-blur-xl flex justify-between items-center w-full px-8 py-2 max-w-[1920px] mx-auto z-50 fixed top-0 border-b border-white/10 shadow-[0_0_20px_rgba(132,43,210,0.1)]">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>change_history</span>
-            <span className="text-2xl font-bold text-primary">AlloySphere</span>
+      <nav className="bg-background/80 backdrop-blur-xl flex justify-between items-center w-full px-3 sm:px-6 md:px-8 py-2 max-w-[1920px] mx-auto z-50 fixed top-0 border-b border-white/10 shadow-[0_0_20px_rgba(132,43,210,0.1)]">
+        <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
+          <Link href="/" className="flex items-center gap-2 md:gap-3">
+            <span className="material-symbols-outlined text-primary text-2xl md:text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>change_history</span>
+            <span className="hidden sm:inline text-xl md:text-2xl font-bold text-primary">AlloySphere</span>
           </Link>
         </div>
 
-        <div className="flex-1 max-w-2xl mx-8 hidden md:block">
+        <div className="flex-1 max-w-2xl mx-4 md:mx-8 hidden md:block">
           <div className="relative group">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
             <input 
@@ -43,18 +43,23 @@ export function TopNav() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Mobile search button */}
+        <button className="md:hidden p-2 hover:bg-white/5 rounded-full transition-colors mr-1">
+          <span className="material-symbols-outlined text-on-surface-variant text-[22px]">search</span>
+        </button>
+
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 shrink-0">
           <NotificationCenter />
           
-          <Link href="/profile" className="flex items-center gap-3 p-1 pr-3 hover:bg-white/5 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 holographic-lift">
+          <Link href="/profile" className="flex items-center gap-2 md:gap-3 p-1 md:pr-3 hover:bg-white/5 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 holographic-lift">
             {profile?.avatar_url ? (
-              <img alt="Profile" className="w-8 h-8 rounded-full object-cover border border-primary/30" src={profile.avatar_url} />
+              <img alt="Profile" className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover border border-primary/30" src={profile.avatar_url} />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-primary/30 font-bold text-xs text-white">
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 flex items-center justify-center border border-primary/30 font-bold text-xs text-white">
                 {(profile?.name || "U").substring(0, 2).toUpperCase()}
               </div>
             )}
-            <div className="hidden lg:block text-left">
+            <div className="hidden md:block text-left">
               <div className="text-xs font-semibold text-on-surface">{profile?.name || "Loading..."}</div>
               <div className="text-[10px] text-on-surface-variant capitalize">{profile?.role?.replace("_", " ") || ""}</div>
             </div>

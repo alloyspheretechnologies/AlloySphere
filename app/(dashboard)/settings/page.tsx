@@ -150,9 +150,9 @@ export default function SettingsPage() {
 
   return (
     <div className="w-full max-w-[1100px] mx-auto animate-in fade-in pb-12">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-on-surface">Settings</h1>
-        <p className="text-on-surface-variant mt-1">Manage your account, profile, and preferences.</p>
+      <header className="mb-4 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-on-surface">Settings</h1>
+        <p className="text-sm md:text-base text-on-surface-variant mt-1">Manage your account, profile, and preferences.</p>
       </header>
 
       {/* Message */}
@@ -164,10 +164,41 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar Nav */}
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+        {/* Navigation — horizontal scrollable on mobile, vertical sidebar on desktop */}
         <nav className="md:w-56 shrink-0">
-          <div className="glass-panel rounded-2xl border border-white/10 p-2 md:sticky md:top-28">
+          {/* Mobile: horizontal scrollable tabs */}
+          <div className="md:hidden mobile-scroll-x -mx-3 px-3">
+            <div className="flex gap-1.5 pb-2 min-w-max">
+              {sections.map((sec) => (
+                <button
+                  key={sec.id}
+                  onClick={() => setActiveSection(sec.id)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all min-h-0 ${
+                    activeSection === sec.id
+                      ? "bg-white/10 text-white font-semibold border border-white/10"
+                      : sec.id === "danger"
+                      ? "text-red-400/70 bg-red-500/5 border border-red-500/10"
+                      : "text-on-surface-variant bg-white/[0.03] border border-white/5 hover:bg-white/5"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">{sec.icon}</span>
+                  {sec.label}
+                </button>
+              ))}
+              <button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap text-red-400 bg-red-500/5 border border-red-500/10 min-h-0 disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[16px]">logout</span>
+                {signingOut ? "Signing out..." : "Sign Out"}
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop: vertical sidebar */}
+          <div className="hidden md:block glass-panel rounded-2xl border border-white/10 p-2 md:sticky md:top-28">
             {sections.map((sec) => (
               <button
                 key={sec.id}
@@ -202,7 +233,7 @@ export default function SettingsPage() {
         <div className="flex-1 min-w-0">
           {/* Profile Settings */}
           {activeSection === "profile" && (
-            <div className="glass-panel p-8 rounded-2xl border border-white/10 space-y-8 animate-in fade-in">
+            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-in fade-in">
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">Profile Settings</h2>
                 <p className="text-sm text-on-surface-variant">Update your public profile information.</p>
@@ -300,7 +331,7 @@ export default function SettingsPage() {
 
           {/* Documents Settings */}
           {activeSection === "documents" && (
-            <div className="glass-panel p-8 rounded-2xl border border-white/10 space-y-8 animate-in fade-in">
+            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-in fade-in">
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">Personal Documents</h2>
                 <p className="text-sm text-on-surface-variant">Upload and manage your personal documents and attachments.</p>
@@ -387,7 +418,7 @@ export default function SettingsPage() {
 
           {/* Account Settings */}
           {activeSection === "account" && (
-            <div className="glass-panel p-8 rounded-2xl border border-white/10 space-y-8 animate-in fade-in">
+            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-in fade-in">
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">Account</h2>
                 <p className="text-sm text-on-surface-variant">Your account details and connected services.</p>
@@ -457,7 +488,7 @@ export default function SettingsPage() {
 
           {/* Notifications */}
           {activeSection === "notifications" && (
-            <div className="glass-panel p-8 rounded-2xl border border-white/10 space-y-8 animate-in fade-in">
+            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-in fade-in">
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">Notifications</h2>
                 <p className="text-sm text-on-surface-variant">Choose what notifications you want to receive.</p>
@@ -491,7 +522,7 @@ export default function SettingsPage() {
 
           {/* Privacy */}
           {activeSection === "privacy" && (
-            <div className="glass-panel p-8 rounded-2xl border border-white/10 space-y-8 animate-in fade-in">
+            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-in fade-in">
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">Privacy</h2>
                 <p className="text-sm text-on-surface-variant">Control who sees your information.</p>
@@ -532,7 +563,7 @@ export default function SettingsPage() {
 
           {/* Appearance */}
           {activeSection === "appearance" && (
-            <div className="glass-panel p-8 rounded-2xl border border-white/10 space-y-8 animate-in fade-in">
+            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-in fade-in">
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">Appearance</h2>
                 <p className="text-sm text-on-surface-variant">Customize how AlloySphere looks.</p>
@@ -562,7 +593,7 @@ export default function SettingsPage() {
 
           {/* Danger Zone */}
           {activeSection === "danger" && (
-            <div className="glass-panel p-8 rounded-2xl border border-red-500/20 space-y-8 animate-in fade-in">
+            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-red-500/20 space-y-6 md:space-y-8 animate-in fade-in">
               <div>
                 <h2 className="text-xl font-bold text-red-400 mb-1">Danger Zone</h2>
                 <p className="text-sm text-on-surface-variant">Irreversible actions that affect your account.</p>
@@ -570,19 +601,19 @@ export default function SettingsPage() {
 
               <div className="space-y-4">
                 <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-xl">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
                       <div className="text-sm font-medium text-white">Export My Data</div>
                       <div className="text-xs text-on-surface-variant">Download all your data as a JSON file</div>
                     </div>
-                    <button className="px-4 py-2 text-xs font-semibold border border-white/10 rounded-lg text-on-surface-variant hover:bg-white/5 transition-colors">
+                    <button className="px-4 py-2 text-xs font-semibold border border-white/10 rounded-lg text-on-surface-variant hover:bg-white/5 transition-colors w-full sm:w-auto min-h-0">
                       Export
                     </button>
                   </div>
                 </div>
 
                 <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-xl">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
                       <div className="text-sm font-medium text-red-400">Delete Account</div>
                       <div className="text-xs text-on-surface-variant">Permanently delete your account and all associated data</div>
@@ -590,7 +621,7 @@ export default function SettingsPage() {
                     <button 
                       onClick={handleDeleteAccount}
                       disabled={signingOut}
-                      className="px-4 py-2 text-xs font-semibold border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                      className="px-4 py-2 text-xs font-semibold border border-red-500/20 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 w-full sm:w-auto min-h-0"
                     >
                       {signingOut ? "Deleting..." : "Delete Account"}
                     </button>

@@ -166,49 +166,49 @@ export default function FounderView() {
       {/* Main Column */}
       <div className="lg:col-span-8 flex flex-col gap-6">
         {/* Startup Overview */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all holographic-lift">
-          <div className="flex justify-between items-start mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
+        <div className="glass-panel p-4 sm:p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all holographic-lift">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-white text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">{startup.name}</h2>
-                <div className="flex items-center gap-2 text-sm text-on-surface-variant mt-1">
+              <div className="min-w-0">
+                <h2 className="text-xl md:text-2xl font-bold text-white truncate">{startup.name}</h2>
+                <div className="flex flex-wrap items-center gap-1 text-xs sm:text-sm text-on-surface-variant mt-1">
                   <span>{startup.industry}</span> • <span className="capitalize">{startup.stage?.replace("_", " ")}</span> • <span>{startup.team_size || 1} Members</span>
                 </div>
               </div>
             </div>
             <Link href="/workspace"
-              className="bg-white/5 text-white px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 hover:bg-white/10 transition-colors flex items-center gap-2">
+              className="w-full sm:w-auto bg-white/5 text-white px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 hover:bg-white/10 transition-colors flex items-center justify-center gap-2 shrink-0">
               <span className="material-symbols-outlined text-[16px]">grid_view</span> Open Workspace
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-white/5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pt-6 border-t border-white/5">
             <div>
               <div className="text-xs text-on-surface-variant uppercase mb-1">Tasks</div>
-              <div className="text-2xl font-bold text-white">{completedTasks}/{tasks.length || 0}</div>
+              <div className="text-xl md:text-2xl font-bold text-white">{completedTasks}/{tasks.length || 0}</div>
             </div>
             <div>
               <div className="text-xs text-on-surface-variant uppercase mb-1">Open Roles</div>
-              <div className="text-2xl font-bold text-white">{opportunities.length}</div>
+              <div className="text-xl md:text-2xl font-bold text-white">{opportunities.length}</div>
             </div>
             <div>
               <div className="text-xs text-on-surface-variant uppercase mb-1">Applications</div>
-              <div className="text-2xl font-bold text-white">{applications.length}</div>
+              <div className="text-xl md:text-2xl font-bold text-white">{applications.length}</div>
             </div>
             <div>
               <div className="text-xs text-on-surface-variant uppercase mb-1">Pending</div>
-              <div className="text-2xl font-bold text-white">{pendingApps}</div>
+              <div className="text-xl md:text-2xl font-bold text-white">{pendingApps}</div>
             </div>
           </div>
         </div>
 
         {/* Chart */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/10 h-[320px] flex flex-col">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-on-surface">Execution Velocity</h3>
+        <div className="glass-panel p-4 sm:p-6 rounded-2xl border border-white/10 h-[240px] md:h-[320px] flex flex-col">
+          <div className="flex justify-between items-center mb-3 md:mb-4">
+            <h3 className="font-bold text-on-surface text-sm md:text-base">Execution Velocity</h3>
             <span className="text-xs text-on-surface-variant bg-white/5 px-2 py-1 rounded">Last 6 Weeks</span>
           </div>
           <div className="flex-1 min-h-0">

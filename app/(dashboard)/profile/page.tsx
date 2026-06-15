@@ -99,29 +99,29 @@ export default function ProfilePage() {
       {/* Banner + Profile Header */}
       <div className="glass-panel rounded-3xl border border-white/10 relative overflow-hidden">
         {/* Banner */}
-        <div className="h-40 bg-gradient-to-r from-white/5 via-white/10 to-white/5 relative">
+        <div className="h-28 sm:h-32 md:h-40 bg-gradient-to-r from-white/5 via-white/10 to-white/5 relative">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.08),transparent_70%)]" />
           <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[rgba(10,10,10,0.7)] to-transparent" />
         </div>
 
         {/* Profile Info */}
-        <div className="px-8 pb-8 -mt-16 relative z-10">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
+        <div className="px-4 sm:px-6 md:px-8 pb-6 md:pb-8 -mt-12 md:-mt-16 relative z-10">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
             {/* Avatar */}
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.name}
-                className="w-28 h-28 rounded-2xl border-4 border-surface-container object-cover shadow-[0_0_30px_rgba(255,255,255,0.1)] avatar-glow"
+                className="w-20 h-20 md:w-28 md:h-28 rounded-2xl border-4 border-surface-container object-cover shadow-[0_0_30px_rgba(255,255,255,0.1)] avatar-glow"
               />
             ) : (
-              <div className="w-28 h-28 rounded-2xl border-4 border-surface-container bg-surface-container-high flex items-center justify-center text-3xl font-bold text-white shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+              <div className="w-20 h-20 md:w-28 md:h-28 rounded-2xl border-4 border-surface-container bg-surface-container-high flex items-center justify-center text-2xl md:text-3xl font-bold text-white shadow-[0_0_30px_rgba(255,255,255,0.1)]">
                 {(profile.name || "U").substring(0, 2).toUpperCase()}
               </div>
             )}
 
-            <div className="flex-1 mt-2">
-              <h1 className="text-3xl font-bold text-white">{profile.name}</h1>
+            <div className="flex-1 mt-0 md:mt-2 min-w-0">
+              <h1 className="text-2xl md:text-3xl font-bold text-white truncate">{profile.name}</h1>
               {profile.headline && (
                 <p className="text-base text-on-surface-variant mt-1">{profile.headline}</p>
               )}
@@ -140,7 +140,7 @@ export default function ProfilePage() {
 
             <Link
               href="/settings"
-              className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 border border-white/10 hover:border-white/20 mt-4 md:mt-6"
+              className="w-full md:w-auto bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 border border-white/10 hover:border-white/20 mt-2 md:mt-6"
             >
               <span className="material-symbols-outlined text-[18px]">edit</span> Edit Profile
             </Link>
@@ -154,22 +154,22 @@ export default function ProfilePage() {
           )}
 
           {/* Stats Row */}
-          <div className="flex gap-6 mt-6 pt-6 border-t border-white/5">
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{stats.contributions}</div>
-              <div className="text-xs text-on-surface-variant uppercase tracking-wider">Contributions</div>
+          <div className="flex flex-wrap gap-4 md:gap-6 mt-6 pt-6 border-t border-white/5">
+            <div className="text-center min-w-[60px]">
+              <div className="text-lg md:text-xl font-bold text-white">{stats.contributions}</div>
+              <div className="text-[10px] md:text-xs text-on-surface-variant uppercase tracking-wider">Contributions</div>
             </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{applications.length}</div>
-              <div className="text-xs text-on-surface-variant uppercase tracking-wider">Applications</div>
+            <div className="text-center min-w-[60px]">
+              <div className="text-lg md:text-xl font-bold text-white">{applications.length}</div>
+              <div className="text-[10px] md:text-xs text-on-surface-variant uppercase tracking-wider">Applications</div>
             </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{startups.length}</div>
-              <div className="text-xs text-on-surface-variant uppercase tracking-wider">Startups</div>
+            <div className="text-center min-w-[60px]">
+              <div className="text-lg md:text-xl font-bold text-white">{startups.length}</div>
+              <div className="text-[10px] md:text-xs text-on-surface-variant uppercase tracking-wider">Startups</div>
             </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-white">{stats.followers}</div>
-              <div className="text-xs text-on-surface-variant uppercase tracking-wider">Connections</div>
+            <div className="text-center min-w-[60px]">
+              <div className="text-lg md:text-xl font-bold text-white">{stats.followers}</div>
+              <div className="text-[10px] md:text-xs text-on-surface-variant uppercase tracking-wider">Connections</div>
             </div>
           </div>
         </div>

@@ -74,9 +74,9 @@ export function NotificationCenter() {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={toggleDropdown}
-        className="relative p-2 hover:bg-white/5 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 holographic-lift focus:outline-none"
+        className="relative p-2 hover:bg-white/5 rounded-full transition-all duration-300 border border-transparent hover:border-white/10 holographic-lift focus:outline-none min-h-0"
       >
-        <span className="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors" style={{ fontVariationSettings: unreadCount > 0 ? "'FILL' 1" : "'FILL' 0" }}>
+        <span className="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors text-[22px] md:text-[24px]" style={{ fontVariationSettings: unreadCount > 0 ? "'FILL' 1" : "'FILL' 0" }}>
           notifications
         </span>
         {unreadCount > 0 && (
@@ -85,64 +85,75 @@ export function NotificationCenter() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 glass-panel rounded-2xl border border-white/10 shadow-2xl overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-200">
-          <div className="flex items-center justify-between p-4 border-b border-white/10 bg-surface-container-high/50">
-            <h3 className="font-bold text-white">Notifications</h3>
-            {unreadCount > 0 && (
-              <button 
-                onClick={handleMarkAllAsRead}
-                className="text-xs text-primary hover:underline font-medium"
-              >
-                Mark all as read
-              </button>
-            )}
-          </div>
+        <>
+          {/* Mobile backdrop */}
+          <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setIsOpen(false)} />
           
-          <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-            {notifications.length > 0 ? (
-              <div className="divide-y divide-white/5">
-                {notifications.map((notif) => (
-                  <div 
-                    key={notif.id} 
-                    onClick={() => handleMarkAsRead(notif.id, notif.is_read)}
-                    className={`p-4 flex gap-3 hover:bg-white/5 transition-colors cursor-pointer ${!notif.is_read ? 'bg-primary/5' : ''}`}
+          {/* Dropdown — full-width on mobile, positioned on desktop */}
+          <div className="fixed left-2 right-2 top-14 z-50 md:absolute md:left-auto md:right-0 md:top-full md:mt-2 md:w-96 glass-panel rounded-2xl border border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200">
+            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-surface-container-high/50">
+              <h3 className="font-bold text-white">Notifications</h3>
+              <div className="flex items-center gap-3">
+                {unreadCount > 0 && (
+                  <button 
+                    onClick={handleMarkAllAsRead}
+                    className="text-xs text-primary hover:underline font-medium"
                   >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className={`text-sm ${!notif.is_read ? 'font-bold text-white' : 'font-medium text-on-surface'}`}>
-                          {notif.title}
-                        </p>
-                        <span className="text-[10px] text-on-surface-variant whitespace-nowrap shrink-0">
-                          {new Date(notif.created_at).toLocaleDateString()}
-                        </span>
+                    Mark all as read
+                  </button>
+                )}
+                <button onClick={() => setIsOpen(false)} className="md:hidden p-1 hover:bg-white/10 rounded-lg transition-colors min-h-0">
+                  <span className="material-symbols-outlined text-on-surface-variant text-[18px]">close</span>
+                </button>
+              </div>
+            </div>
+            
+            <div className="max-h-[60vh] md:max-h-[400px] overflow-y-auto custom-scrollbar">
+              {notifications.length > 0 ? (
+                <div className="divide-y divide-white/5">
+                  {notifications.map((notif) => (
+                    <div 
+                      key={notif.id} 
+                      onClick={() => handleMarkAsRead(notif.id, notif.is_read)}
+                      className={`p-4 flex gap-3 hover:bg-white/5 transition-colors cursor-pointer ${!notif.is_read ? 'bg-primary/5' : ''}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className={`text-sm ${!notif.is_read ? 'font-bold text-white' : 'font-medium text-on-surface'}`}>
+                            {notif.title}
+                          </p>
+                          <span className="text-[10px] text-on-surface-variant whitespace-nowrap shrink-0">
+                            {new Date(notif.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-on-surface-variant line-clamp-2">{notif.body}</p>
+                        {notif.link && (
+                          <Link href={notif.link} className="inline-block mt-2 text-xs text-primary hover:underline">
+                            View Details
+                          </Link>
+                        )}
                       </div>
-                      <p className="text-xs text-on-surface-variant line-clamp-2">{notif.body}</p>
-                      {notif.link && (
-                        <Link href={notif.link} className="inline-block mt-2 text-xs text-primary hover:underline">
-                          View Details
-                        </Link>
+                      {!notif.is_read && (
+                        <div className="w-2 h-2 bg-primary rounded-full mt-1.5 shrink-0 shadow-[0_0_8px_rgba(14,165,233,0.8)]"></div>
                       )}
                     </div>
-                    {!notif.is_read && (
-                      <div className="w-2 h-2 bg-primary rounded-full mt-1.5 shrink-0 shadow-[0_0_8px_rgba(14,165,233,0.8)]"></div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center">
-                <span className="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-2 block">notifications_off</span>
-                <p className="text-sm text-on-surface-variant">You're all caught up!</p>
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <span className="material-symbols-outlined text-4xl text-on-surface-variant/50 mb-2 block">notifications_off</span>
+                  <p className="text-sm text-on-surface-variant">You're all caught up!</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-3 border-t border-white/10 bg-surface-container-high/50 text-center">
+              <Link href="/settings?tab=notifications" onClick={() => setIsOpen(false)} className="text-xs text-on-surface-variant hover:text-white transition-colors">
+                Notification Settings
+              </Link>
+            </div>
           </div>
-          
-          <div className="p-3 border-t border-white/10 bg-surface-container-high/50 text-center">
-            <Link href="/settings?tab=notifications" onClick={() => setIsOpen(false)} className="text-xs text-on-surface-variant hover:text-white transition-colors">
-              Notification Settings
-            </Link>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );

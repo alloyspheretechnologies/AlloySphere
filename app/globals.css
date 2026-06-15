@@ -134,11 +134,13 @@
 }
 
 @layer utilities {
-  /* Mobile Touch Targets */
-  button, a, select, input[type="button"], input[type="submit"] {
-    @apply min-h-[44px];
+  /* Mobile Touch Targets — scoped to interactive elements in main content, not nav bars */
+  @media (max-width: 767px) {
+    .touch-target {
+      min-height: 44px;
+    }
   }
-  
+
   /* Horizontal scrolling protection */
   .mobile-no-scroll {
     @apply max-w-[100vw] overflow-x-hidden;
@@ -150,6 +152,31 @@
   }
   .pt-safe {
     padding-top: env(safe-area-inset-top, 16px);
+  }
+
+  /* Mobile horizontal scrollable container */
+  .mobile-scroll-x {
+    @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .mobile-scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Prevent zoom on input focus for iOS */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="url"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  textarea,
+  select {
+    font-size: 16px !important;
   }
 }
 

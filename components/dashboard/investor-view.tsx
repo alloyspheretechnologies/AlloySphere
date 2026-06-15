@@ -76,7 +76,7 @@ export default function InvestorView() {
                 <span className="material-symbols-outlined text-on-surface-variant text-[18px]">{stat.icon}</span>
                 <span className="text-xs text-on-surface-variant uppercase">{stat.label}</span>
               </div>
-              <div className="text-2xl font-bold text-white">{stat.value}</div>
+              <div className="text-xl md:text-2xl font-bold text-white">{stat.value}</div>
             </div>
           ))}
         </div>

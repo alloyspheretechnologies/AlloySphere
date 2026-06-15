@@ -15,18 +15,18 @@ export function MobileBottomNav({ role }: { role: string | null }) {
       href: role === 'founder' ? "/startup" : role === 'investor' ? "/investments" : "/jobs" 
     },
     { icon: "dynamic_feed", label: "Feed", href: "/feed" },
-    { icon: "menu", label: "Menu", href: "#drawer", action: "drawer" } // Will open drawer
+    { icon: "menu", label: "More", href: "#drawer", action: "drawer" }
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 w-full bg-surface-container/95 backdrop-blur-xl border-t border-white/10 z-50 px-2 pb-safe pt-2">
+    <div className="md:hidden fixed bottom-0 left-0 w-full bg-surface-container/95 backdrop-blur-xl border-t border-white/10 z-50 px-1 pb-safe pt-1">
       <div className="flex justify-around items-center">
         {navItems.map((item) => {
           if (item.action === "drawer") {
             return (
-              <button key={item.label} id="mobile-drawer-trigger" className="flex flex-col items-center justify-center w-16 py-1 text-on-surface-variant hover:text-white transition-colors">
-                <span className="material-symbols-outlined text-[24px] mb-1">{item.icon}</span>
-                <span className="text-[10px] font-medium">{item.label}</span>
+              <button key={item.label} id="mobile-drawer-trigger" className="flex flex-col items-center justify-center flex-1 py-1.5 text-on-surface-variant hover:text-white transition-colors min-h-0">
+                <span className="material-symbols-outlined text-[22px] mb-0.5">{item.icon}</span>
+                <span className="text-[10px] font-medium leading-tight">{item.label}</span>
               </button>
             );
           }
@@ -36,16 +36,16 @@ export function MobileBottomNav({ role }: { role: string | null }) {
             <Link 
               key={item.label} 
               href={item.href}
-              className={`flex flex-col items-center justify-center w-16 py-1 transition-colors ${
+              className={`flex flex-col items-center justify-center flex-1 py-1.5 transition-colors min-h-0 ${
                 isActive ? "text-primary" : "text-on-surface-variant hover:text-white"
               }`}
             >
-              <div className={`px-4 py-1 rounded-full mb-1 transition-colors ${isActive ? 'bg-primary/20' : ''}`}>
-                <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
+              <div className={`px-3 py-0.5 rounded-full mb-0.5 transition-colors ${isActive ? 'bg-primary/20' : ''}`}>
+                <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
                   {item.icon}
                 </span>
               </div>
-              <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+              <span className={`text-[10px] leading-tight ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
             </Link>
           );
         })}
