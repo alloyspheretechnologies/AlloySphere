@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { profileService } from "@/lib/services/profile.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useWorkspaceStore } from "@/lib/store/useWorkspaceStore";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 
 interface DiscussionMessage {
   id: string;
@@ -30,6 +32,8 @@ export default function DiscussionsPage() {
   const [messages, setMessages] = useState<DiscussionMessage[]>([]);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const { startup } = useWorkspaceStore();
 
   useEffect(() => {
     profileService.getCurrentProfile().then(({ data }) => {
@@ -37,6 +41,39 @@ export default function DiscussionsPage() {
       setLoading(false);
     });
   }, []);
+
+  // Setup Supabase Realtime broadcast channel for discussions
+  useEffect(() => {
+    if (!startup) return;
+
+    const supabase = getSupabaseBrowserClient();
+    const channelId = `discussions-${startup.id}`;
+
+    // Clean up previous channel if it exists
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    const channel = supabase.channel(channelId);
+    channelRef.current = channel;
+
+    channel.on("broadcast", { event: "discussion_message" }, (payload) => {
+      const msg = payload.payload as DiscussionMessage;
+      // Only add messages from other users (we already added ours optimistically)
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+    });
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+      channelRef.current = null;
+    };
+  }, [startup]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -53,8 +90,19 @@ export default function DiscussionsPage() {
       content: input.trim(),
       created_at: new Date().toISOString(),
     };
+
+    // Add message locally (optimistic)
     setMessages((prev) => [...prev, msg]);
     setInput("");
+
+    // Broadcast to other users
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: "broadcast",
+        event: "discussion_message",
+        payload: msg,
+      });
+    }
   };
 
   const channelMessages = messages.filter((m) => m.channel === activeChannel);

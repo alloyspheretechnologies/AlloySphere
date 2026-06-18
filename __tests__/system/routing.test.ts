@@ -8,12 +8,19 @@ jest.mock('next/server', () => {
   class MockNextRequest {
     url: string;
     nextUrl: any;
+    cookies: any;
     constructor(url: string) {
       this.url = url;
       const parsedUrl = new URL(url);
       this.nextUrl = {
         pathname: parsedUrl.pathname,
+        searchParams: parsedUrl.searchParams,
         clone: () => new URL(url),
+      };
+      this.cookies = {
+        has: () => false,
+        getAll: () => [],
+        set: () => {},
       };
     }
   }
@@ -24,8 +31,9 @@ jest.mock('next/server', () => {
       redirect: jest.fn().mockImplementation((url: URL) => ({
         headers: { get: (key: string) => key === 'location' ? url.toString() : null },
       })),
-      next: jest.fn().mockImplementation(() => ({
+      next: jest.fn().mockImplementation((args) => ({
         headers: { get: () => null },
+        cookies: { set: () => {} },
       })),
     },
   };
@@ -43,6 +51,16 @@ jest.mock('@supabase/ssr', () => ({
         error: null,
       }),
     },
+    from: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          single: jest.fn().mockResolvedValue({
+            data: { role: 'founder', onboarding_complete: true },
+            error: null,
+          }),
+        }),
+      }),
+    }),
   })),
 }));
 

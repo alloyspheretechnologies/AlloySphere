@@ -127,8 +127,8 @@ export function NotificationCenter() {
                           </span>
                         </div>
                         <p className="text-xs text-on-surface-variant line-clamp-2">{notif.body}</p>
-                        {notif.link && (
-                          <Link href={notif.link} className="inline-block mt-2 text-xs text-primary hover:underline">
+                        {(notif.data as any)?.link && (
+                          <Link href={(notif.data as any).link} className="inline-block mt-2 text-xs text-primary hover:underline">
                             View Details
                           </Link>
                         )}

@@ -29,12 +29,16 @@ export async function GET(request: Request) {
           .eq('user_id', user.id)
           .single();
 
-        let redirectUrl = `${origin}${next}`;
+        let redirectUrl: string;
 
         if (profile?.onboarding_complete) {
           redirectUrl = `${origin}/dashboard`;
         } else if (pendingRole || (profile?.role && profile.role !== 'talent')) {
+          // Role was explicitly selected (either via cookie or previously saved in DB)
           redirectUrl = `${origin}/onboarding`;
+        } else {
+          // No explicit role — send to role selection
+          redirectUrl = `${origin}/role-selection`;
         }
 
         const response = NextResponse.redirect(redirectUrl);

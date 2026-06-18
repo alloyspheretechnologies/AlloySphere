@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 export async function updateSession(request: NextRequest) {
   // If a Supabase OAuth redirect lands on the root (e.g. missing callback URL in Supabase config)
   // catch the code and forward it to our callback route to properly finish auth.
-  if (request.nextUrl.searchParams.has('code') && !request.nextUrl.pathname.startsWith('/auth/callback')) {
+  if (request.nextUrl.searchParams?.has('code') && !request.nextUrl.pathname.startsWith('/auth/callback')) {
     const callbackUrl = request.nextUrl.clone();
     callbackUrl.pathname = '/auth/callback';
     return NextResponse.redirect(callbackUrl);
@@ -62,7 +62,8 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url);
       }
 
-      const hasSelectedRole = request.cookies.has('role_selected');
+      // Check both the cookie and the DB role to determine if role was explicitly chosen
+      const hasSelectedRole = request.cookies.has('role_selected') || (profile?.role && profile.role !== 'talent');
       const url = request.nextUrl.clone();
       url.pathname = hasSelectedRole ? '/onboarding' : '/role-selection';
       return NextResponse.redirect(url);
@@ -81,8 +82,8 @@ export async function updateSession(request: NextRequest) {
         .single();
         
       if (!profile?.onboarding_complete) {
-        // Since the DB schema defaults 'role' to 'talent', we use a cookie to track explicit selection.
-        const hasSelectedRole = request.cookies.has('role_selected');
+        // Check both cookie and DB role for explicit selection
+        const hasSelectedRole = request.cookies.has('role_selected') || (profile?.role && profile.role !== 'talent');
         
         if (!hasSelectedRole) {
           const url = request.nextUrl.clone();

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useRouter } from "next/navigation";
 import { profileService } from "@/lib/services/profile.service";
 import { useEffect, useState } from "react";
@@ -15,12 +17,21 @@ export default function RoleSelectionPage() {
   const { syncSession, user } = useAuthStore();
 
   useEffect(() => {
-    profileService.getCurrentProfile().then(({ data }) => {
-      if (data) {
-        if (data.onboarding_complete) router.push("/dashboard");
-        else if (document.cookie.includes("role_selected=true")) router.push("/onboarding");
-        else setProfile(data);
+    // Only check profile routing if the user is already authenticated
+    authService.getUser().then(({ user: currentUser }) => {
+      if (!currentUser) {
+        // Not authenticated — this is the normal sign-up flow, show role cards
+        return;
       }
+      // Authenticated user — check if they should be somewhere else
+      profileService.getCurrentProfile().then(({ data }) => {
+        if (data) {
+          if (data.onboarding_complete) router.push("/dashboard");
+          else if (data.role && data.role !== "talent") router.push("/onboarding");
+          else if (document.cookie.includes("role_selected=true")) router.push("/onboarding");
+          else setProfile(data);
+        }
+      });
     });
   }, [router]);
 
@@ -104,6 +115,13 @@ export default function RoleSelectionPage() {
             </p>
           </button>
         </div>
+
+        <p className="text-sm text-on-surface-variant mt-12 text-center">
+          Already have an account?{" "}
+          <Link href="/login" className="text-primary hover:underline font-semibold">
+            Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );

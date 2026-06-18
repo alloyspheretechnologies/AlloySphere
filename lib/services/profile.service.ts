@@ -172,6 +172,14 @@ export const profileService = {
       .from('avatars')
       .getPublicUrl(path);
 
+    // Update the profile record with the new URL so it persists
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ avatar_url: publicUrl })
+      .eq('id', userId);
+
+    if (updateError) return { url: null, error: updateError };
+
     return { url: publicUrl, error: null };
   },
 };

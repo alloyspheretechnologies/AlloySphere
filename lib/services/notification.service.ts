@@ -25,9 +25,12 @@ export const notificationService = {
 
   async createNotification(payload: { user_id: string; title: string; body: string; type: string; metadata?: any; link?: string }) {
     const supabase = getSupabaseBrowserClient();
+    // Store link inside the data jsonb field since there's no separate link column
+    const { link, metadata, ...rest } = payload;
+    const data_field = { ...(metadata || {}), ...(link ? { link } : {}) };
     const { data, error } = await supabase
       .from('notifications')
-      .insert([payload])
+      .insert([{ ...rest, data: data_field }])
       .select()
       .single();
     return { data, error };
@@ -65,7 +68,15 @@ export const notificationService = {
 
   subscribeToNotifications(userId: string, callback: (notification: Notification) => void) {
     const supabase = getSupabaseBrowserClient();
-    const channelId = `notifications-${userId}-${Math.random().toString(36).substring(7)}`;
+    const channelId = `notifications-${userId}`;
+
+    // Remove any existing channel with this ID to prevent duplicates
+    const existingChannels = supabase.getChannels();
+    const existing = existingChannels.find((ch: any) => ch.topic === channelId);
+    if (existing) {
+      supabase.removeChannel(existing);
+    }
+
     const channel = supabase
       .channel(channelId)
       .on(
@@ -75,6 +86,8 @@ export const notificationService = {
       );
       
     channel.subscribe();
+    
+    // Return the channel so callers can clean up
     return channel;
   },
 };

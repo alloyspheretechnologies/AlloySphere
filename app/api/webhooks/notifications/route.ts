@@ -30,7 +30,8 @@ export async function POST(req: Request) {
       // Check user preferences here (omitted for brevity, assume enabled)
       const userEmail = userData.user.email;
 
-      const linkUrl = notification.link ? `${process.env.NEXT_PUBLIC_SITE_URL}${notification.link}` : '';
+      const notifLink = notification.data?.link || notification.link;
+      const linkUrl = notifLink ? `${process.env.NEXT_PUBLIC_SITE_URL}${notifLink}` : '';
 
       // Route based on notification type
       if (notification.type === 'message') {

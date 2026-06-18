@@ -163,10 +163,13 @@ export default function DocumentsPage() {
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {doc.file_url && (
-                  <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
+                  <button onClick={async () => {
+                      const { url } = await documentService.getDocumentUrl(doc.file_url);
+                      if (url) window.open(url, '_blank');
+                    }}
                     className="p-1.5 rounded hover:bg-white/5 text-on-surface-variant hover:text-white transition-colors">
                     <span className="material-symbols-outlined text-[18px]">download</span>
-                  </a>
+                  </button>
                 )}
                 <button onClick={() => handleDeleteDoc(doc.id)}
                   className="p-1.5 rounded hover:bg-white/5 text-on-surface-variant hover:text-red-400 transition-colors">

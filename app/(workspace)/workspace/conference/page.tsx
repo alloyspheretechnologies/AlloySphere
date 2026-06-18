@@ -193,7 +193,7 @@ export default function ConferencePage() {
                 video={false}
                 audio={!isMuted}
                 token={liveKitToken}
-                serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || "wss://alloysphere-producion-qf6vkz13.livekit.cloud"}
+                serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || "wss://alloysphere-production-qf6vkz13.livekit.cloud"}
                 // Use default connect options
                 connect={true}
               >

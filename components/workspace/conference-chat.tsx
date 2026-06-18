@@ -151,7 +151,7 @@ export function ConferenceChat({ channel, profile }: ChatProps) {
 
   const handleDownload = async (doc: SharedDoc) => {
     if (!doc.url) return;
-    const { url } = await documentService.getDocumentUrl(doc.url);
+    const { url } = await documentService.getDocumentUrl(doc.url, 'conference_files');
     if (url) window.open(url, '_blank');
   };
 

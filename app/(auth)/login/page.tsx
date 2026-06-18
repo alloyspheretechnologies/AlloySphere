@@ -1,8 +1,31 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { authService } from "@/lib/services/auth.service";
+import { useAuthStore } from "@/lib/store/useAuthStore";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { isAuthenticated, role, onboardingComplete, loading } = useAuthStore();
+
+  // Redirect authenticated users away from login
+  useEffect(() => {
+    if (loading) return;
+    if (!isAuthenticated) return;
+
+    if (onboardingComplete) {
+      router.push("/dashboard");
+    } else if (role && role !== "talent") {
+      // They have an explicitly-chosen role, go to onboarding
+      router.push("/onboarding");
+    } else {
+      // No explicit role yet — send to role selection
+      router.push("/role-selection");
+    }
+  }, [isAuthenticated, role, onboardingComplete, loading, router]);
+
   const handleGoogleLogin = async () => {
     await authService.signInWithGoogle();
   };
@@ -35,7 +58,14 @@ export default function LoginPage() {
           Continue with Google
         </button>
 
-        <p className="text-xs text-on-surface-variant mt-8 text-center px-4">
+        <p className="text-sm text-on-surface-variant mt-6 text-center">
+          Don&apos;t have an account?{" "}
+          <Link href="/role-selection" className="text-primary hover:underline font-semibold">
+            Sign Up
+          </Link>
+        </p>
+
+        <p className="text-xs text-on-surface-variant mt-4 text-center px-4">
           By continuing, you agree to AlloySphere&apos;s Terms of Service and Privacy Policy.
         </p>
       </div>

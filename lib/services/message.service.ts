@@ -184,7 +184,21 @@ export const messageService = {
       table: 'messages',
       event: 'INSERT',
       filter: `conversation_id=eq.${conversationId}`,
-      callback: (payload) => callback(payload.new as Message)
+      callback: async (payload) => {
+        // Realtime payload.new doesn't include joined sender profile,
+        // so re-fetch the message with the sender join
+        const supabase = getSupabaseBrowserClient();
+        const { data } = await supabase
+          .from('messages')
+          .select(`
+            *,
+            sender:profiles!messages_sender_id_fkey(id, name, avatar_url)
+          `)
+          .eq('id', (payload.new as any).id)
+          .single();
+        
+        callback((data ?? payload.new) as Message);
+      }
     });
   },
 };
