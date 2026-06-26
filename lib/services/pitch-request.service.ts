@@ -8,11 +8,41 @@ export const pitchRequestService = {
    */
   async createPitchRequest(data: PitchRequestInsert) {
     const supabase = getSupabaseBrowserClient();
+    
+    // Check if the investor already has a pending pitch request globally
+    const { data: existing, error: checkError } = await supabase
+      .from('pitch_requests')
+      .select('id')
+      .eq('investor_id', data.investor_id)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      return { data: null, error: { message: 'You can only have 1 pending pitch request at a time. Please wait for a response before sending another.', code: 'LIMIT_EXCEEDED' } as any };
+    }
+
     const { data: request, error } = await supabase
       .from('pitch_requests')
       .insert(data)
       .select()
       .single();
+
+    if (request && !error) {
+      await notificationService.createNotification({
+        user_id: data.founder_id,
+        type: 'pitch_request_received',
+        title: 'New Pitch Request',
+        body: 'An investor has requested a pitch from your startup.',
+        metadata: {
+          pitch_request_id: request.id,
+          startup_id: data.startup_id,
+          investor_id: data.investor_id,
+        },
+        link: '/pitch-requests',
+      });
+    }
 
     return { data: request as PitchRequest | null, error };
   },
@@ -69,6 +99,8 @@ export const pitchRequestService = {
       .select('id, status')
       .eq('investor_id', investorId)
       .eq('startup_id', startupId)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     return { data, exists: !!data, error };
