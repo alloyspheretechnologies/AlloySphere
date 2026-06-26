@@ -29,21 +29,6 @@ export const pitchRequestService = {
       .select()
       .single();
 
-    if (request && !error) {
-      await notificationService.createNotification({
-        user_id: data.founder_id,
-        type: 'pitch_request_received',
-        title: 'New Pitch Request',
-        body: 'An investor has requested a pitch from your startup.',
-        metadata: {
-          pitch_request_id: request.id,
-          startup_id: data.startup_id,
-          investor_id: data.investor_id,
-        },
-        link: '/pitch-requests',
-      });
-    }
-
     return { data: request as PitchRequest | null, error };
   },
 

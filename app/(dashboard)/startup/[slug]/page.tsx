@@ -474,14 +474,17 @@ export default function StartupProfilePage() {
                       setPitchStatus('pending');
                     } else {
                       console.error(error);
+                      alert(error.message || "Failed to send pitch request.");
                     }
                   } else {
                     setPitchRequested(true);
                     setPitchStatus('pending');
                   }
-                  setShowPitchModal(false);
-                  setPitchMessage("");
-                } catch (e) { console.error(e); } finally { setSendingPitch(false); }
+                  if (!error || error.code === '23505') {
+                    setShowPitchModal(false);
+                    setPitchMessage("");
+                  }
+                } catch (e) { console.error(e); alert("An unexpected error occurred."); } finally { setSendingPitch(false); }
               }}
               disabled={sendingPitch}
               className="px-6 py-2 bg-emerald-500 text-black rounded-xl text-sm font-semibold hover:bg-emerald-400 disabled:opacity-50 transition-all">

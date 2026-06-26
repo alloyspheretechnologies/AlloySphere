@@ -26,7 +26,8 @@ export default function PitchRequestsPage() {
       const { data: profile } = await profileService.getCurrentProfile();
       if (!profile) return;
       
-      const { data: reqs } = await pitchRequestService.getIncomingPitchRequests(profile.id);
+      const { data: reqs, error } = await pitchRequestService.getIncomingPitchRequests(profile.id);
+      if (error) console.error("Error fetching pitch requests:", error);
       setRequests(reqs || []);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
