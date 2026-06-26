@@ -65,6 +65,7 @@ export function SideNav() {
       { icon: "home", label: "Home", href: "/home" },
       { icon: "explore", label: "Discover Startups", href: "/discover" },
       { icon: "account_balance_wallet", label: "Portfolio", href: "/investments" },
+      { icon: "handshake", label: "Pitch Requests", href: "/pitch-requests" },
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
       ...(hasStartup ? [{ icon: "360", label: "Conference", href: "/workspace/conference", isFill: true }] : []),
     ]}

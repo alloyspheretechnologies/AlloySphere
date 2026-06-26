@@ -11,6 +11,7 @@ export default function PitchRequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [role, setRole] = useState<string | null>(null);
   
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -25,10 +26,17 @@ export default function PitchRequestsPage() {
     try {
       const { data: profile } = await profileService.getCurrentProfile();
       if (!profile) return;
+      setRole(profile.role);
       
-      const { data: reqs, error } = await pitchRequestService.getIncomingPitchRequests(profile.id);
-      if (error) console.error("Error fetching pitch requests:", error);
-      setRequests(reqs || []);
+      if (profile.role === 'investor') {
+        const { data: reqs, error } = await pitchRequestService.getMyPitchRequests(profile.id);
+        if (error) console.error("Error fetching pitch requests:", error);
+        setRequests(reqs || []);
+      } else {
+        const { data: reqs, error } = await pitchRequestService.getIncomingPitchRequests(profile.id);
+        if (error) console.error("Error fetching pitch requests:", error);
+        setRequests(reqs || []);
+      }
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
 
@@ -74,7 +82,9 @@ export default function PitchRequestsPage() {
     <div className="w-full max-w-[1200px] mx-auto animate-in fade-in pb-12">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-on-surface">Pitch Requests</h1>
-        <p className="text-on-surface-variant mt-2">Manage incoming pitch requests from investors.</p>
+        <p className="text-on-surface-variant mt-2">
+          {role === 'investor' ? "Track your pitch requests and view reports from founders." : "Manage incoming pitch requests from investors."}
+        </p>
       </header>
 
       <div className="flex gap-2 mb-6 flex-wrap">
@@ -98,27 +108,49 @@ export default function PitchRequestsPage() {
             return (
               <div key={req.id} className="glass-panel p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all">
                 <div className="flex flex-col md:flex-row justify-between md:items-start gap-4 mb-4">
-                  <div className="flex gap-4 items-start">
-                    <ProfileLink profileId={investor.id}>
-                      {investor.avatar_url ? (
-                        <img src={investor.avatar_url} alt="" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold text-white">
-                          {(investor.name || "I").charAt(0)}
-                        </div>
-                      )}
-                    </ProfileLink>
-                    <div>
-                      <h3 className="text-base font-bold text-white flex items-center gap-2">
-                        {investor.name || "Investor"}
-                        <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${cfg.bg} ${cfg.text}`}>{req.status}</span>
-                      </h3>
-                      <p className="text-sm text-on-surface-variant">{investor.headline || "Investor"}</p>
-                      <div className="text-xs text-on-surface-variant mt-1">Requested a pitch for <span className="font-semibold text-white">{startup.name || 'Startup'}</span> • {new Date(req.created_at).toLocaleDateString()}</div>
+                  {role === 'investor' ? (
+                    <div className="flex gap-4 items-start">
+                      <Link href={`/startup/${startup.slug}`}>
+                        {startup.logo_url ? (
+                          <img src={startup.logo_url} alt="" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold text-white">
+                            {(startup.name || "S").charAt(0)}
+                          </div>
+                        )}
+                      </Link>
+                      <div>
+                        <h3 className="text-base font-bold text-white flex items-center gap-2">
+                          <Link href={`/startup/${startup.slug}`} className="hover:underline">{startup.name || "Startup"}</Link>
+                          <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${cfg.bg} ${cfg.text}`}>{req.status}</span>
+                        </h3>
+                        <p className="text-sm text-on-surface-variant">{startup.industry || "Unknown Industry"}</p>
+                        <div className="text-xs text-on-surface-variant mt-1">Requested a pitch • {new Date(req.created_at).toLocaleDateString()}</div>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex gap-4 items-start">
+                      <ProfileLink profileId={investor.id}>
+                        {investor.avatar_url ? (
+                          <img src={investor.avatar_url} alt="" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold text-white">
+                            {(investor.name || "I").charAt(0)}
+                          </div>
+                        )}
+                      </ProfileLink>
+                      <div>
+                        <h3 className="text-base font-bold text-white flex items-center gap-2">
+                          {investor.name || "Investor"}
+                          <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${cfg.bg} ${cfg.text}`}>{req.status}</span>
+                        </h3>
+                        <p className="text-sm text-on-surface-variant">{investor.headline || "Investor"}</p>
+                        <div className="text-xs text-on-surface-variant mt-1">Requested a pitch for <span className="font-semibold text-white">{startup.name || 'Startup'}</span> • {new Date(req.created_at).toLocaleDateString()}</div>
+                      </div>
+                    </div>
+                  )}
                   
-                  {req.status === "pending" && (
+                  {role !== 'investor' && req.status === "pending" && (
                     <div className="flex items-center gap-2 shrink-0">
                       <button onClick={() => handleOpenModal(req, 'declined')}
                         className="px-4 py-1.5 text-xs font-semibold rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">
@@ -153,7 +185,9 @@ export default function PitchRequestsPage() {
         <div className="glass-panel p-12 rounded-2xl border border-white/10 text-center">
           <span className="material-symbols-outlined text-[48px] text-on-surface-variant mb-4 block">handshake</span>
           <h3 className="text-lg font-bold text-white mb-2">No pitch requests</h3>
-          <p className="text-sm text-on-surface-variant">When investors request a pitch from your startup, they will appear here.</p>
+          <p className="text-sm text-on-surface-variant">
+            {role === 'investor' ? "You have not requested any pitches yet." : "When investors request a pitch from your startup, they will appear here."}
+          </p>
         </div>
       )}
 
