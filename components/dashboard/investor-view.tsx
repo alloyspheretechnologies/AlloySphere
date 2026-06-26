@@ -4,13 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { profileService } from "@/lib/services/profile.service";
 import { startupService } from "@/lib/services/startup.service";
+import { pitchRequestService } from "@/lib/services/pitch-request.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { ProfileLink } from "@/components/shared/profile-link";
 
 export default function InvestorView() {
   const [profile, setProfile] = useState<any>(null);
   const [investorProfile, setInvestorProfile] = useState<any>(null);
   const [watchlist, setWatchlist] = useState<any[]>([]);
   const [discoveredStartups, setDiscoveredStartups] = useState<any[]>([]);
+  const [pitchRequests, setPitchRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +47,10 @@ export default function InvestorView() {
       // Load startups for discovery
       const { data: startups } = await startupService.listStartups({ pageSize: 8 });
       setDiscoveredStartups(startups || []);
+
+      // Load outgoing pitch requests
+      const { data: pitchReqs } = await pitchRequestService.getMyPitchRequests(prof.id);
+      setPitchRequests(pitchReqs || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -200,6 +207,35 @@ export default function InvestorView() {
             <div className="text-sm font-semibold">Pipeline</div>
           </Link>
         </div>
+
+        {/* Pitch Requests */}
+        {pitchRequests.length > 0 && (
+          <div className="glass-panel p-6 rounded-2xl border border-white/10">
+            <h3 className="text-base font-bold text-on-surface mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-on-surface-variant">handshake</span> Pitch Requests
+            </h3>
+            <div className="space-y-3">
+              {pitchRequests.slice(0, 5).map((pr: any) => (
+                <Link key={pr.id} href={`/startup/${pr.startup?.slug || ''}`}
+                  className="flex items-center gap-3 p-3 bg-surface-container-high/50 rounded-lg border border-white/5 hover:border-white/10 transition-all">
+                  <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                    {(pr.startup?.name || "S").charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-white truncate">{pr.startup?.name}</div>
+                    <div className="text-[10px] text-on-surface-variant">{new Date(pr.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${
+                    pr.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+                    pr.status === 'accepted' ? 'bg-emerald-500/20 text-emerald-400' :
+                    pr.status === 'declined' ? 'bg-red-500/20 text-red-400' :
+                    'bg-white/5 text-on-surface-variant'
+                  }`}>{pr.status}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Check Size */}
         {investorProfile && (investorProfile.check_size_min || investorProfile.check_size_max) && (

@@ -326,6 +326,23 @@ export interface SavedStartup {
   created_at: string;
 }
 
+export interface PitchRequest {
+  id: string;
+  investor_id: string;
+  startup_id: string;
+  founder_id: string;
+  status: 'pending' | 'viewed' | 'accepted' | 'declined' | 'expired';
+  message: string | null;
+  response: string | null;
+  created_at: string;
+  responded_at: string | null;
+}
+
+export type PitchRequestInsert = Omit<PitchRequest, 'id' | 'created_at' | 'responded_at' | 'status' | 'response'> & {
+  id?: string;
+  status?: PitchRequest['status'];
+};
+
 export interface SavedOpportunity {
   id: string;
   user_id: string;

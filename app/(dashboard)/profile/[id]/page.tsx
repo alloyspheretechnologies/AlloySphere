@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { profileService } from "@/lib/services/profile.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -12,9 +12,12 @@ export default function PublicProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
-  // Stats
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectLoading, setConnectLoading] = useState(false);
+  const [myProfileId, setMyProfileId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (id) loadData();
@@ -33,6 +36,18 @@ export default function PublicProfilePage() {
       ]);
       setFollowers(fCount || 0);
       setFollowing(flCount || 0);
+
+      // Check if current user has a connection request with this profile
+      const { data: myProf } = await profileService.getCurrentProfile();
+      if (myProf) {
+        setMyProfileId(myProf.id);
+        const { data: existing } = await supabase
+          .from('connection_requests')
+          .select('id')
+          .or(`and(from_user_id.eq.${myProf.id},to_user_id.eq.${id}),and(from_user_id.eq.${id},to_user_id.eq.${myProf.id})`)
+          .maybeSingle();
+        if (existing) setIsConnected(true);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -77,10 +92,55 @@ export default function PublicProfilePage() {
           </div>
           
           <div className="flex gap-3 mt-4 md:mt-0">
-            <button className="px-5 py-2 bg-white text-black rounded-xl text-sm font-semibold hover:bg-white/90 transition-all flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">person_add</span> Connect
+            <button
+              disabled={connectLoading || isConnected}
+              onClick={async () => {
+                if (!myProfileId || isConnected) return;
+                setConnectLoading(true);
+                try {
+                  const supabase = getSupabaseBrowserClient();
+                  await supabase.from('connection_requests').insert({
+                    from_user_id: myProfileId,
+                    to_user_id: id,
+                    status: 'pending',
+                  });
+                  setIsConnected(true);
+                } catch (e) { console.error(e); } finally { setConnectLoading(false); }
+              }}
+              className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
+                isConnected ? 'bg-white/10 text-white/70 cursor-default' : 'bg-white text-black hover:bg-white/90'
+              }`}>
+              <span className="material-symbols-outlined text-[18px]">{isConnected ? 'check' : 'person_add'}</span>
+              {isConnected ? 'Connected' : connectLoading ? 'Sending...' : 'Connect'}
             </button>
-            <button className="px-4 py-2 bg-white/5 text-white rounded-xl text-sm font-semibold border border-white/10 hover:bg-white/10 transition-colors">
+            <button
+              onClick={async () => {
+                if (!myProfileId) return;
+                const supabase = getSupabaseBrowserClient();
+                // Check for existing conversation
+                const { data: existing } = await supabase.rpc('find_or_create_dm', {
+                  p_user_a: myProfileId,
+                  p_user_b: id,
+                });
+                if (existing) {
+                  router.push(`/messages/${existing}`);
+                } else {
+                  // Fallback: create conversation
+                  const { data: conv } = await supabase
+                    .from('conversations')
+                    .insert({ created_by: myProfileId, type: 'direct' })
+                    .select('id')
+                    .single();
+                  if (conv) {
+                    await supabase.from('conversation_participants').insert([
+                      { conversation_id: conv.id, user_id: myProfileId },
+                      { conversation_id: conv.id, user_id: id },
+                    ]);
+                    router.push(`/messages/${conv.id}`);
+                  }
+                }
+              }}
+              className="px-4 py-2 bg-white/5 text-white rounded-xl text-sm font-semibold border border-white/10 hover:bg-white/10 transition-colors">
               Message
             </button>
           </div>

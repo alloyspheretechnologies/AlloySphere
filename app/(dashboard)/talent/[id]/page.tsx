@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { profileService } from "@/lib/services/profile.service";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function TalentProfilePage() {
   const params = useParams();
   const id = params.id as string;
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [myProfileId, setMyProfileId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (id) loadData();
@@ -20,6 +23,9 @@ export default function TalentProfilePage() {
       const { data } = await profileService.getProfile(id);
       if (!data) return;
       setProfile(data);
+
+      const { data: myProf } = await profileService.getCurrentProfile();
+      if (myProf) setMyProfileId(myProf.id);
     } catch (e) {
       console.error(e);
     } finally {
@@ -64,10 +70,37 @@ export default function TalentProfilePage() {
           </div>
           
           <div className="flex gap-3 mt-4 md:mt-0">
-            <button className="px-5 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-400 transition-all flex items-center gap-2">
+            <button
+              onClick={() => router.push('/workspace/recruitment')}
+              className="px-5 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-400 transition-all flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">add</span> Recruit
             </button>
-            <button className="px-4 py-2 bg-white/5 text-white rounded-xl text-sm font-semibold border border-white/10 hover:bg-white/10 transition-colors">
+            <button
+              onClick={async () => {
+                if (!myProfileId) return;
+                const supabase = getSupabaseBrowserClient();
+                const { data: existing } = await supabase.rpc('find_or_create_dm', {
+                  p_user_a: myProfileId,
+                  p_user_b: id,
+                });
+                if (existing) {
+                  router.push(`/messages/${existing}`);
+                } else {
+                  const { data: conv } = await supabase
+                    .from('conversations')
+                    .insert({ created_by: myProfileId, type: 'direct' })
+                    .select('id')
+                    .single();
+                  if (conv) {
+                    await supabase.from('conversation_participants').insert([
+                      { conversation_id: conv.id, user_id: myProfileId },
+                      { conversation_id: conv.id, user_id: id },
+                    ]);
+                    router.push(`/messages/${conv.id}`);
+                  }
+                }
+              }}
+              className="px-4 py-2 bg-white/5 text-white rounded-xl text-sm font-semibold border border-white/10 hover:bg-white/10 transition-colors">
               Message
             </button>
           </div>

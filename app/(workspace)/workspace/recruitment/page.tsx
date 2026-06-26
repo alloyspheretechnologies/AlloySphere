@@ -8,6 +8,7 @@ import { startupService } from "@/lib/services/startup.service";
 import { workspaceService } from "@/lib/services/workspace.service";
 import { Modal } from "@/components/shared/modal";
 import { SlideOver } from "@/components/shared/slide-over";
+import { ProfileLink } from "@/components/shared/profile-link";
 
 const COLUMNS = ["applied", "reviewing", "interview"];
 
@@ -129,7 +130,7 @@ export default function RecruitmentPage() {
                 <div key={app.id} onClick={() => { setSelectedApp(app); setShowAppDetail(true); }}
                   className="glass-panel p-4 rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer holographic-lift">
                   <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-3">
+                    <ProfileLink profileId={app.applicant_id} role="talent" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                       {app.applicant?.avatar_url ? (
                         <img src={app.applicant.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover border border-white/10" />
                       ) : (
@@ -141,7 +142,7 @@ export default function RecruitmentPage() {
                         <div className="text-sm font-bold text-white leading-tight">{app.applicant?.name || "Unknown"}</div>
                         <div className="text-[10px] text-on-surface-variant">{new Date(app.applied_at || app.created_at).toLocaleDateString()}</div>
                       </div>
-                    </div>
+                    </ProfileLink>
                   </div>
                   <div className="text-xs font-medium text-white mb-2">{app.opportunity?.title}</div>
                   {app.cover_letter && <p className="text-[10px] text-on-surface-variant line-clamp-2 border-t border-white/5 pt-2">{app.cover_letter}</p>}
@@ -160,7 +161,9 @@ export default function RecruitmentPage() {
             {applications.filter(a => a.status === "accepted" || a.status === "rejected").slice(0, 10).map((app: any) => (
               <div key={app.id} className="glass-panel p-4 rounded-xl border border-white/5">
                 <div className="flex justify-between items-center">
-                  <div className="text-sm font-medium text-white">{app.applicant?.name || "Unknown"}</div>
+                  <ProfileLink profileId={app.applicant_id} role="talent" className="text-sm font-medium text-white hover:underline">
+                    {app.applicant?.name || "Unknown"}
+                  </ProfileLink>
                   <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
                     app.status === "accepted" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
                   }`}>{app.status}</span>
@@ -220,20 +223,24 @@ export default function RecruitmentPage() {
         {selectedApp && (
           <div className="p-6 space-y-6">
             <div className="flex items-center gap-4">
-              {selectedApp.applicant?.avatar_url ? (
-                <img src={selectedApp.applicant.avatar_url} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/10" />
-              ) : (
-                <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-bold text-white">
-                  {(selectedApp.applicant?.name || "U").substring(0, 2).toUpperCase()}
-                </div>
-              )}
-              <div>
-                <h2 className="text-xl font-bold text-white">{selectedApp.applicant?.name || "Unknown"}</h2>
-                {selectedApp.applicant?.headline && (
-                  <p className="text-xs text-on-surface-variant">{selectedApp.applicant.headline}</p>
+              <ProfileLink profileId={selectedApp.applicant_id} role="talent" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                {selectedApp.applicant?.avatar_url ? (
+                  <img src={selectedApp.applicant.avatar_url} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/10" />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-bold text-white">
+                    {(selectedApp.applicant?.name || "U").substring(0, 2).toUpperCase()}
+                  </div>
                 )}
-                <p className="text-sm text-on-surface-variant mt-0.5">Applied for: <span className="text-white font-medium">{selectedApp.opportunity?.title}</span></p>
-              </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">{selectedApp.applicant?.name || "Unknown"}</h2>
+                  {selectedApp.applicant?.headline && (
+                    <p className="text-xs text-on-surface-variant">{selectedApp.applicant.headline}</p>
+                  )}
+                </div>
+              </ProfileLink>
+            </div>
+            <div>
+              <p className="text-sm text-on-surface-variant mt-0.5">Applied for: <span className="text-white font-medium">{selectedApp.opportunity?.title}</span></p>
             </div>
 
             {selectedApp.applicant?.skills && selectedApp.applicant.skills.length > 0 && (

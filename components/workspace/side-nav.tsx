@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { profileService } from "@/lib/services/profile.service";
 import { startupService } from "@/lib/services/startup.service";
+import { notificationService } from "@/lib/services/notification.service";
 
 export function SideNav() {
   const pathname = usePathname();
@@ -23,10 +24,12 @@ export function SideNav() {
             setHasStartup(true);
           }
         }
+        
+        // Fetch real unread count
+        const { count } = await notificationService.getUnreadCount(data.id);
+        setUnreadCount(count || 0);
       }
     });
-    // Mock unread
-    setUnreadCount(3);
   }, []);
 
   const getFounderMenu = () => [
@@ -34,6 +37,7 @@ export function SideNav() {
       { icon: "home", label: "Home", href: "/home" },
       { icon: "rocket_launch", label: "Startup", href: "/startup" },
       { icon: "grid_view", label: "Workspace", href: "/workspace", isFill: true },
+      { icon: "handshake", label: "Pitch Requests", href: "/home" },
       { icon: "360", label: "Conference", href: "/workspace/conference", isFill: true },
     ]},
     { section: "Network", items: [

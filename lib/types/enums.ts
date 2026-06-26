@@ -36,6 +36,8 @@ export type NotificationType =
   | 'comment'
   | 'message'
   | 'investor_interest'
+  | 'pitch_request_received'
+  | 'pitch_request_responded'
   | 'workspace_update'
   | 'member_invited'
   | 'member_joined'

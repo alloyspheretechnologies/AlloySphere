@@ -11,3 +11,4 @@ export { messageService } from './message.service';
 export { analyticsService } from './analytics.service';
 export { searchService } from './search.service';
 export { documentService } from './document.service';
+export { pitchRequestService } from './pitch-request.service';

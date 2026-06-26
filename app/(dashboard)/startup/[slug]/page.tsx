@@ -11,6 +11,9 @@ import { workspaceService } from "@/lib/services/workspace.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { roadmapService } from "@/lib/services/roadmap.service";
 import { realtimeService } from "@/lib/services/realtime.service";
+import { pitchRequestService } from "@/lib/services/pitch-request.service";
+import { ProfileLink } from "@/components/shared/profile-link";
+import { Modal } from "@/components/shared/modal";
 
 export default function StartupProfilePage() {
   const params = useParams();
@@ -30,6 +33,11 @@ export default function StartupProfilePage() {
   const [rankScore, setRankScore] = useState(0);
   const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [pitchRequested, setPitchRequested] = useState(false);
+  const [pitchStatus, setPitchStatus] = useState<string | null>(null);
+  const [showPitchModal, setShowPitchModal] = useState(false);
+  const [pitchMessage, setPitchMessage] = useState("");
+  const [sendingPitch, setSendingPitch] = useState(false);
 
   useEffect(() => { if (slug) loadData(); }, [slug]);
 
@@ -82,6 +90,15 @@ export default function StartupProfilePage() {
         setIsFollowing(isFollowing);
         setIsLiked(isLiked);
         setIsSaved(!!savedData);
+
+        // Check pitch request status for investors
+        if (prof.role === 'investor') {
+          const { data: pitchData } = await pitchRequestService.hasPitchRequest(prof.id, s.id);
+          if (pitchData) {
+            setPitchRequested(true);
+            setPitchStatus(pitchData.status);
+          }
+        }
       }
 
       // Get initial counts
@@ -200,6 +217,23 @@ export default function StartupProfilePage() {
                 <span className="material-symbols-outlined text-[18px]" style={isLiked ? { fontVariationSettings: "'FILL' 1" } : undefined}>favorite</span>
                 {likesCount} {isLiked ? "Liked" : "Like"}
               </button>
+              {profile?.role === 'investor' && (
+                pitchRequested ? (
+                  <span className={`px-5 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 border ${
+                    pitchStatus === 'accepted' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                    pitchStatus === 'declined' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                    'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                  }`}>
+                    <span className="material-symbols-outlined text-[18px]">handshake</span>
+                    {pitchStatus === 'accepted' ? 'Pitch Accepted' : pitchStatus === 'declined' ? 'Declined' : 'Pitch Requested'}
+                  </span>
+                ) : (
+                  <button onClick={() => setShowPitchModal(true)}
+                    className="px-5 py-2 bg-emerald-500 text-black rounded-xl text-sm font-semibold hover:bg-emerald-400 transition-all flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">handshake</span> Request Pitch
+                  </button>
+                )
+              )}
               <button onClick={handleFollow}
                 className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
                   isFollowing ? "bg-white/10 text-white border border-white/10" : "bg-white text-black hover:bg-white/90"
@@ -310,7 +344,8 @@ export default function StartupProfilePage() {
       {activeTab === "team" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in">
           {members.map((m: any) => (
-            <div key={m.id} className="glass-panel p-5 rounded-xl border border-white/10 flex items-center gap-4">
+            <ProfileLink key={m.id} profileId={m.profile?.id || m.user_id} role={m.profile?.role}
+              className="glass-panel p-5 rounded-xl border border-white/10 hover:border-white/20 transition-all flex items-center gap-4">
               {m.profile?.avatar_url ? (
                 <img src={m.profile.avatar_url} alt="" className="w-12 h-12 rounded-xl object-cover border border-white/10" />
               ) : (
@@ -323,7 +358,7 @@ export default function StartupProfilePage() {
                 <div className="text-xs text-on-surface-variant">{m.profile?.headline || ""}</div>
                 <span className="text-[10px] uppercase font-bold text-on-surface-variant capitalize">{m.role}</span>
               </div>
-            </div>
+            </ProfileLink>
           ))}
         </div>
       )}
@@ -385,15 +420,17 @@ export default function StartupProfilePage() {
           {posts.length > 0 ? posts.map((post: any) => (
             <div key={post.id} className="glass-panel p-5 rounded-xl border border-white/10">
               <div className="flex items-center gap-3 mb-3">
-                {post.author?.avatar_url ? (
-                  <img src={post.author.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
-                ) : (
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs font-bold text-white">{(post.author?.name || "U").charAt(0)}</div>
-                )}
-                <div>
-                  <span className="text-sm font-medium text-white">{post.author?.name}</span>
-                  <span className="text-xs text-on-surface-variant ml-2">{new Date(post.created_at).toLocaleDateString()}</span>
-                </div>
+                <ProfileLink profileId={post.author_id} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                  {post.author?.avatar_url ? (
+                    <img src={post.author.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs font-bold text-white">{(post.author?.name || "U").charAt(0)}</div>
+                  )}
+                  <div>
+                    <span className="text-sm font-medium text-white">{post.author?.name}</span>
+                    <span className="text-xs text-on-surface-variant ml-2">{new Date(post.created_at).toLocaleDateString()}</span>
+                  </div>
+                </ProfileLink>
               </div>
               <p className="text-sm text-on-surface leading-relaxed">{post.content}</p>
               <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/5 text-xs text-on-surface-variant">
@@ -404,6 +441,55 @@ export default function StartupProfilePage() {
           )) : <p className="text-center text-on-surface-variant py-8">No updates posted yet.</p>}
         </div>
       )}
+
+      {/* Pitch Request Modal */}
+      <Modal open={showPitchModal} onClose={() => setShowPitchModal(false)} title="Request a Pitch" size="lg">
+        <div className="space-y-4">
+          <div className="glass-panel p-4 rounded-xl border border-white/5">
+            <div className="text-sm font-medium text-white">{startup?.name}</div>
+            <div className="text-xs text-on-surface-variant capitalize">{startup?.industry} • {startup?.stage?.replace("_", " ")}</div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm text-on-surface-variant font-medium">Message to Founder</label>
+            <textarea value={pitchMessage} onChange={(e) => setPitchMessage(e.target.value)}
+              className="w-full bg-surface-container-high border border-white/10 rounded-xl p-3 text-sm text-white focus:border-white/40 focus:outline-none min-h-[120px] resize-none"
+              placeholder="Tell the founder why you're interested and what you'd like to learn about their startup..." />
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+            <button onClick={() => setShowPitchModal(false)} className="px-4 py-2 text-sm text-on-surface-variant hover:text-white">Cancel</button>
+            <button
+              onClick={async () => {
+                if (!profile || !startup) return;
+                setSendingPitch(true);
+                try {
+                  const { error } = await pitchRequestService.createPitchRequest({
+                    investor_id: profile.id,
+                    startup_id: startup.id,
+                    founder_id: startup.owner_id,
+                    message: pitchMessage || null,
+                  });
+                  if (error) {
+                    if (error.code === '23505') {
+                      setPitchRequested(true);
+                      setPitchStatus('pending');
+                    } else {
+                      console.error(error);
+                    }
+                  } else {
+                    setPitchRequested(true);
+                    setPitchStatus('pending');
+                  }
+                  setShowPitchModal(false);
+                  setPitchMessage("");
+                } catch (e) { console.error(e); } finally { setSendingPitch(false); }
+              }}
+              disabled={sendingPitch}
+              className="px-6 py-2 bg-emerald-500 text-black rounded-xl text-sm font-semibold hover:bg-emerald-400 disabled:opacity-50 transition-all">
+              {sendingPitch ? "Sending..." : "Send Pitch Request"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

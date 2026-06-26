@@ -92,6 +92,52 @@ export const applicationService = {
         role: 'member',
         status: 'active'
       });
+
+      // Notify the talent that they were accepted
+      const { data: opp } = await supabase
+        .from('opportunities')
+        .select('title')
+        .eq('id', data.opportunity_id)
+        .single();
+
+      const { data: startup } = await supabase
+        .from('startups')
+        .select('name')
+        .eq('id', data.startup_id)
+        .single();
+
+      await supabase.from('notifications').insert({
+        user_id: data.applicant_id,
+        type: 'application_accepted',
+        title: `You've been accepted!`,
+        body: `Your application for ${opp?.title || 'a role'} at ${startup?.name || 'a startup'} has been accepted. Welcome to the team!`,
+        data: {
+          application_id: appId,
+          startup_id: data.startup_id,
+          opportunity_id: data.opportunity_id,
+          link: '/applications',
+        },
+      });
+    }
+
+    if (status === 'rejected' && data && !error) {
+      // Notify the talent that they were rejected
+      const { data: opp } = await supabase
+        .from('opportunities')
+        .select('title')
+        .eq('id', data.opportunity_id)
+        .single();
+
+      await supabase.from('notifications').insert({
+        user_id: data.applicant_id,
+        type: 'application_rejected',
+        title: 'Application Update',
+        body: `Your application for ${opp?.title || 'a role'} was not selected. Keep exploring opportunities!`,
+        data: {
+          application_id: appId,
+          link: '/applications',
+        },
+      });
     }
 
     return { data: data as Application | null, error };

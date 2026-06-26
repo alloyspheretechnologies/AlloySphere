@@ -9,7 +9,9 @@ import { applicationService } from "@/lib/services/application.service";
 import { opportunityService } from "@/lib/services/opportunity.service";
 import { taskService } from "@/lib/services/task.service";
 import { workspaceService } from "@/lib/services/workspace.service";
+import { pitchRequestService } from "@/lib/services/pitch-request.service";
 import { Modal } from "@/components/shared/modal";
+import { ProfileLink } from "@/components/shared/profile-link";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const chartData = [
@@ -24,6 +26,7 @@ export default function FounderView() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [pitchRequests, setPitchRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateStartup, setShowCreateStartup] = useState(false);
 
@@ -61,6 +64,10 @@ export default function FounderView() {
 
         const { data: opps } = await opportunityService.listOpportunities({ startupId: myStartup.id });
         setOpportunities(opps || []);
+
+        // Load incoming pitch requests
+        const { data: pitchReqs } = await pitchRequestService.getIncomingPitchRequests(profile.id);
+        setPitchRequests(pitchReqs || []);
       }
     } catch (e) {
       console.error(e);
@@ -263,13 +270,15 @@ export default function FounderView() {
               {applications.slice(0, 4).map((app: any, i: number) => (
                 <div key={app.id || i} className="bg-surface-container-high/50 p-3 rounded-lg border border-white/5">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
-                      {(app.applicant_name || "U").substring(0, 2).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-white truncate">{app.applicant_name || "Applicant"}</div>
-                      <div className="text-xs text-on-surface-variant truncate">{app.opportunity_title || "Role"}</div>
-                    </div>
+                    <ProfileLink profileId={app.applicant_id || app.applicant?.id} role="talent" className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                      <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
+                        {(app.applicant_name || "U").substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-white truncate">{app.applicant_name || "Applicant"}</div>
+                        <div className="text-xs text-on-surface-variant truncate">{app.opportunity_title || "Role"}</div>
+                      </div>
+                    </ProfileLink>
                     <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${
                       app.status === "accepted" ? "bg-emerald-500/20 text-emerald-400" :
                       app.status === "rejected" ? "bg-red-500/20 text-red-400" :
@@ -286,6 +295,56 @@ export default function FounderView() {
             View All Applications
           </Link>
         </div>
+
+        {/* Pitch Requests */}
+        {pitchRequests.length > 0 && (
+          <div className="glass-panel p-6 rounded-2xl border border-white/10">
+            <h3 className="text-base font-bold text-on-surface mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-on-surface-variant">handshake</span> Pitch Requests
+              <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto">
+                {pitchRequests.filter(p => p.status === 'pending').length}
+              </span>
+            </h3>
+            <div className="space-y-3">
+              {pitchRequests.slice(0, 4).map((pr: any) => (
+                <div key={pr.id} className="bg-surface-container-high/50 p-3 rounded-lg border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <ProfileLink profileId={pr.investor_id} role="investor" className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                      {pr.investor?.avatar_url ? (
+                        <img src={pr.investor.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover border border-white/10" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400">
+                          {(pr.investor?.name || "I").substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-white truncate">{pr.investor?.name || "Investor"}</div>
+                        <div className="text-xs text-on-surface-variant truncate">{pr.startup?.name}</div>
+                      </div>
+                    </ProfileLink>
+                    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${
+                      pr.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+                      pr.status === 'accepted' ? 'bg-emerald-500/20 text-emerald-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>{pr.status}</span>
+                  </div>
+                  {pr.status === 'pending' && (
+                    <div className="flex gap-2 mt-2 pt-2 border-t border-white/5">
+                      <button onClick={async () => { await pitchRequestService.respondToPitchRequest(pr.id, 'accepted'); loadData(); }}
+                        className="flex-1 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-xs font-bold transition-colors">
+                        Accept
+                      </button>
+                      <button onClick={async () => { await pitchRequestService.respondToPitchRequest(pr.id, 'declined'); loadData(); }}
+                        className="flex-1 py-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg text-xs font-bold transition-colors">
+                        Decline
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
