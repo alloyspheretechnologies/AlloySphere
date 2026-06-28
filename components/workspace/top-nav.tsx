@@ -20,10 +20,10 @@ export function TopNav() {
 
   return (
     <>
-      <nav className="bg-background/80 backdrop-blur-xl flex justify-between items-center w-full px-3 sm:px-6 md:px-8 py-2 max-w-[1920px] mx-auto z-50 fixed top-0 border-b border-white/10 shadow-[0_0_20px_rgba(132,43,210,0.1)]">
+      <nav className="bg-background/80 backdrop-blur-xl flex justify-between items-center w-full px-3 sm:px-6 md:px-8 py-1.5 md:py-2 max-w-[1920px] mx-auto z-50 fixed top-0 border-b border-white/10 shadow-[0_0_20px_rgba(132,43,210,0.1)]">
         <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
           <Link href="/" className="flex items-center gap-2 md:gap-3">
-            <span className="material-symbols-outlined text-primary text-2xl md:text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>change_history</span>
+            <span className="material-symbols-outlined text-primary text-xl md:text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>change_history</span>
             <span className="hidden sm:inline text-xl md:text-2xl font-bold text-primary">AlloySphere</span>
           </Link>
         </div>
@@ -44,7 +44,7 @@ export function TopNav() {
         </div>
 
         {/* Mobile search button */}
-        <button className="md:hidden p-2 hover:bg-white/5 rounded-full transition-colors mr-1">
+        <button className="md:hidden p-2 hover:bg-white/5 rounded-full transition-colors mr-1 touch-target">
           <span className="material-symbols-outlined text-on-surface-variant text-[22px]">search</span>
         </button>
 

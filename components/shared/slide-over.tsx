@@ -46,22 +46,22 @@ export function SlideOver({ open, onClose, title, children, width = "md" }: Slid
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" />
 
-      {/* Panel */}
+      {/* Panel — full width on mobile, constrained on desktop */}
       <div
-        className={`relative z-10 w-full ${widthMap[width]} h-full bg-surface-container border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col`}
+        className={`relative z-10 w-full md:${widthMap[width]} h-full bg-surface-container border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col`}
       >
         {title && (
-          <div className="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0">
-            <h2 className="text-lg font-bold text-white">{title}</h2>
+          <div className="h-14 md:h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-6 shrink-0">
+            <h2 className="text-base md:text-lg font-bold text-white">{title}</h2>
             <button
               onClick={onClose}
-              className="text-on-surface-variant hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors"
+              className="text-on-surface-variant hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors touch-target"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
       </div>
     </div>
   );

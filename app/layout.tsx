@@ -5,7 +5,6 @@ import { AOSProvider } from "@/components/providers/aos-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { AppErrorBoundary } from "@/components/shared/error-boundary";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
-import { FeedbackWidget } from "@/components/shared/feedback-widget";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -41,7 +40,6 @@ export default function RootLayout({
             <AOSProvider />
             <AuthProvider>
               {children}
-              <FeedbackWidget />
             </AuthProvider>
           </PostHogProvider>
         </AppErrorBoundary>

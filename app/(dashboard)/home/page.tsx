@@ -223,23 +223,23 @@ export default function HomePage() {
   return (
     <div className="w-full max-w-[1600px] mx-auto animate-in fade-in duration-500 pb-12">
       {/* Hero */}
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-on-surface">
+      <header className="mb-5 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-on-surface">
           {getGreeting()}, {profile?.name?.split(" ")[0] || user?.user_metadata?.name?.split(" ")[0] || "User"}{" "}
           <span className="inline-block animate-bounce">👋</span>
         </h1>
-        <p className="text-on-surface-variant mt-2">
+        <p className="text-sm md:text-base text-on-surface-variant mt-1 md:mt-2">
           Here&apos;s what&apos;s happening across the AlloySphere ecosystem.
         </p>
       </header>
 
       {/* Ecosystem Stats */}
-      <div className="mb-8">
+      <div className="mb-5 md:mb-8">
         <HomeEcosystemStats stats={ecosystemStats} />
       </div>
 
       {/* Role-specific Widgets */}
-      <div className="mb-8">
+      <div className="mb-5 md:mb-8">
         <HomeRoleWidgets
           role={role}
           founderData={founderData}
@@ -249,15 +249,15 @@ export default function HomePage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
         {/* Left Column — Feed + Startups */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-8 flex flex-col gap-4 md:gap-6">
           <HomeTrendingStartups startups={trendingStartups} />
           <HomeEcosystemFeed posts={feedPosts} />
         </div>
 
         {/* Right Column — Activity + Contributors */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
+        <div className="lg:col-span-4 flex flex-col gap-4 md:gap-6">
           <HomeActivityStream activities={activities} />
           <HomeTopContributors contributors={topContributors} />
         </div>

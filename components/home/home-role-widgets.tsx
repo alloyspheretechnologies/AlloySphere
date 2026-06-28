@@ -30,12 +30,12 @@ interface RoleWidgetsProps {
 export default function HomeRoleWidgets({ role, founderData, talentData, investorData }: RoleWidgetsProps) {
   if (role === "founder" && founderData) {
     return (
-      <div className="glass-panel p-6 rounded-2xl border border-white/10">
+      <div className="glass-panel p-4 md:p-6 rounded-2xl border border-white/10">
         <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-5">
           <span className="material-symbols-outlined text-on-surface-variant">dashboard_customize</span>
           Founder Command Center
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 mb-4">
           <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
             <div className="text-xs text-on-surface-variant uppercase mb-1">Applications</div>
             <div className="text-xl font-bold text-white">{founderData.applicationsReceived}</div>
@@ -54,10 +54,10 @@ export default function HomeRoleWidgets({ role, founderData, talentData, investo
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href="/workspace" className="flex-1 py-2.5 border border-white/10 rounded-xl text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
+          <Link href="/workspace" className="flex-1 py-2 md:py-2.5 border border-white/10 rounded-xl text-xs md:text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
             Open Workspace
           </Link>
-          <Link href="/applications" className="flex-1 py-2.5 border border-white/10 rounded-xl text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
+          <Link href="/applications" className="flex-1 py-2 md:py-2.5 border border-white/10 rounded-xl text-xs md:text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
             View Applications
           </Link>
         </div>
@@ -67,12 +67,12 @@ export default function HomeRoleWidgets({ role, founderData, talentData, investo
 
   if (role === "talent" && talentData) {
     return (
-      <div className="glass-panel p-6 rounded-2xl border border-white/10">
+      <div className="glass-panel p-4 md:p-6 rounded-2xl border border-white/10">
         <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-5">
           <span className="material-symbols-outlined text-on-surface-variant">dashboard_customize</span>
           Your Activity
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 mb-4">
           <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
             <div className="text-xs text-on-surface-variant uppercase mb-1">Applications</div>
             <div className="text-xl font-bold text-white">{talentData.totalApplications}</div>
@@ -113,10 +113,10 @@ export default function HomeRoleWidgets({ role, founderData, talentData, investo
           </div>
         )}
         <div className="flex gap-2 mt-4">
-          <Link href="/jobs" className="flex-1 py-2.5 border border-white/10 rounded-xl text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
+          <Link href="/jobs" className="flex-1 py-2 md:py-2.5 border border-white/10 rounded-xl text-xs md:text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
             Browse Opportunities
           </Link>
-          <Link href="/applications" className="flex-1 py-2.5 border border-white/10 rounded-xl text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
+          <Link href="/applications" className="flex-1 py-2 md:py-2.5 border border-white/10 rounded-xl text-xs md:text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
             My Applications
           </Link>
         </div>
@@ -126,12 +126,12 @@ export default function HomeRoleWidgets({ role, founderData, talentData, investo
 
   if (role === "investor" && investorData) {
     return (
-      <div className="glass-panel p-6 rounded-2xl border border-white/10">
+      <div className="glass-panel p-4 md:p-6 rounded-2xl border border-white/10">
         <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-5">
           <span className="material-symbols-outlined text-on-surface-variant">dashboard_customize</span>
           Investment Overview
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 mb-4">
           <div className="p-3 bg-white/[0.02] border border-white/5 rounded-xl">
             <div className="text-xs text-on-surface-variant uppercase mb-1">Watchlist</div>
             <div className="text-xl font-bold text-white">{investorData.watchlistCount}</div>
@@ -155,10 +155,10 @@ export default function HomeRoleWidgets({ role, founderData, talentData, investo
           </div>
         )}
         <div className="flex gap-2">
-          <Link href="/discover" className="flex-1 py-2.5 border border-white/10 rounded-xl text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
+          <Link href="/discover" className="flex-1 py-2 md:py-2.5 border border-white/10 rounded-xl text-xs md:text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
             Discover Startups
           </Link>
-          <Link href="/investments" className="flex-1 py-2.5 border border-white/10 rounded-xl text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
+          <Link href="/investments" className="flex-1 py-2 md:py-2.5 border border-white/10 rounded-xl text-xs md:text-sm text-white hover:bg-white/5 transition-colors text-center font-medium">
             Manage Portfolio
           </Link>
         </div>

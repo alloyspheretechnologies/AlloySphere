@@ -23,7 +23,7 @@ export default async function DashboardLayout({
     <div className="flex flex-col min-h-screen bg-transparent text-foreground">
       <ThreeBackground />
       <TopNav />
-      <div className="flex flex-1 pt-14 md:pt-20 pb-16 md:pb-0"> {/* Reduced pt on mobile for smaller top nav, pb for bottom nav */}
+      <div className="flex flex-1 pt-12 md:pt-20 pb-[72px] md:pb-0"> {/* Compact pt on mobile for smaller top nav, pb for bottom nav */}
         <SideNav />
         {/* Responsive main content area */}
         <main className="flex-1 min-w-0 w-full md:ml-64 p-3 sm:p-4 lg:p-8">

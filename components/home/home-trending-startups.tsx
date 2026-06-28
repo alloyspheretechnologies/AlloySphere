@@ -24,7 +24,7 @@ export default function HomeTrendingStartups({ startups }: { startups: TrendingS
   }
 
   return (
-    <div className="glass-panel p-6 rounded-2xl border border-white/10">
+    <div className="glass-panel p-4 md:p-6 rounded-2xl border border-white/10">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-lg font-bold text-white flex items-center gap-2">
           <span className="material-symbols-outlined text-on-surface-variant">trending_up</span>

@@ -24,7 +24,7 @@ export function MobileBottomNav({ role }: { role: string | null }) {
         {navItems.map((item) => {
           if (item.action === "drawer") {
             return (
-              <button key={item.label} id="mobile-drawer-trigger" className="flex flex-col items-center justify-center flex-1 py-1.5 text-on-surface-variant hover:text-white transition-colors min-h-0">
+              <button key={item.label} id="mobile-drawer-trigger" onClick={() => window.dispatchEvent(new CustomEvent('open-mobile-drawer'))} className="flex flex-col items-center justify-center flex-1 py-1.5 text-on-surface-variant hover:text-white transition-colors min-h-0">
                 <span className="material-symbols-outlined text-[22px] mb-0.5">{item.icon}</span>
                 <span className="text-[10px] font-medium leading-tight">{item.label}</span>
               </button>

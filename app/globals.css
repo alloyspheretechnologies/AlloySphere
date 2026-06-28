@@ -138,6 +138,7 @@
   @media (max-width: 767px) {
     .touch-target {
       min-height: 44px;
+      min-width: 44px;
     }
   }
 
@@ -164,6 +165,25 @@
   .mobile-scroll-x::-webkit-scrollbar {
     display: none;
   }
+
+  /* Custom scrollbar for overflow containers */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
 }
 
 /* Prevent zoom on input focus for iOS */
@@ -183,4 +203,18 @@
 html, body {
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile-specific overscroll containment */
+@media (max-width: 767px) {
+  html, body {
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Ensure modals/drawers don't scroll the body */
+  body.overflow-hidden {
+    position: fixed;
+    width: 100%;
+  }
 }

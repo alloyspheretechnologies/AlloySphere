@@ -18,7 +18,7 @@ export default function HomeTopContributors({ contributors }: { contributors: Co
   }
 
   return (
-    <div className="glass-panel p-6 rounded-2xl border border-white/10">
+    <div className="glass-panel p-4 md:p-6 rounded-2xl border border-white/10">
       <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-5">
         <span className="material-symbols-outlined text-on-surface-variant">emoji_events</span>
         Top Contributors

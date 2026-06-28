@@ -27,16 +27,15 @@ export function MobileDrawer({ profile }: { profile: any }) {
   }, [profile, role]);
 
   useEffect(() => {
-    // Listen for clicks on the trigger button defined in mobile-bottom-nav
+    // Listen for the custom event dispatched by mobile-bottom-nav
     const handleDrawerOpen = () => setOpen(true);
-    const trigger = document.getElementById("mobile-drawer-trigger");
-    if (trigger) trigger.addEventListener("click", handleDrawerOpen);
+    window.addEventListener('open-mobile-drawer', handleDrawerOpen);
     
     // Close on route change
     setOpen(false);
 
     return () => {
-      if (trigger) trigger.removeEventListener("click", handleDrawerOpen);
+      window.removeEventListener('open-mobile-drawer', handleDrawerOpen);
     };
   }, [pathname]);
 

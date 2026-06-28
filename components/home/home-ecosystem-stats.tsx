@@ -24,7 +24,7 @@ export default function HomeEcosystemStats({ stats }: { stats: EcosystemStats })
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
       {items.map((item) => (
         <div key={item.label} className="glass-panel p-4 rounded-xl border border-white/10 hover:border-white/20 transition-all group">
           <div className="flex items-center gap-2 mb-2">
