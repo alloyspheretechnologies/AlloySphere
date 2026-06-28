@@ -9,7 +9,7 @@ import { investorService } from "@/lib/services/investor.service";
 import AvatarUpload from "@/components/settings/avatar-upload";
 import { DocumentUpload } from "@/components/settings/document-upload";
 
-type SettingsSection = "profile" | "account" | "notifications" | "privacy" | "appearance" | "documents" | "danger";
+type SettingsSection = "profile" | "account" | "notifications" | "privacy" | "danger";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -134,11 +134,9 @@ export default function SettingsPage() {
 
   const sections: { id: SettingsSection; label: string; icon: string }[] = [
     { id: "profile", label: "Profile", icon: "person" },
-    { id: "documents", label: "Documents", icon: "folder" },
     { id: "account", label: "Account", icon: "manage_accounts" },
     { id: "notifications", label: "Notifications", icon: "notifications" },
     { id: "privacy", label: "Privacy", icon: "lock" },
-    { id: "appearance", label: "Appearance", icon: "palette" },
     { id: "danger", label: "Danger Zone", icon: "warning" },
   ];
 
@@ -329,92 +327,6 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Documents Settings */}
-          {activeSection === "documents" && (
-            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-in fade-in">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-1">Personal Documents</h2>
-                <p className="text-sm text-on-surface-variant">Upload and manage your personal documents and attachments.</p>
-              </div>
-
-              {(profile?.role === 'talent' || profile?.role === 'startup' || profile?.role === 'admin') && (
-                <div className="space-y-6">
-                  <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">Talent / Career Documents</h3>
-                  
-                  <DocumentUpload
-                    label="Resume / CV"
-                    description="Upload your latest resume (PDF or DOCX)."
-                    currentUrl={resumeUrl}
-                    bucketName="profile_documents"
-                    folderPath="resumes"
-                    acceptedTypes=".pdf,.doc,.docx"
-                    onUploadSuccess={async (url) => {
-                      await profileService.updateProfile(profile.user_id, { resume_url: url });
-                      setResumeUrl(url);
-                    }}
-                    onDeleteSuccess={async () => {
-                      await profileService.updateProfile(profile.user_id, { resume_url: null });
-                      setResumeUrl(null);
-                    }}
-                  />
-
-                  <DocumentUpload
-                    label="Certifications"
-                    description="Upload relevant certificates or licenses."
-                    currentUrl={certificationsUrl}
-                    bucketName="profile_documents"
-                    folderPath="certifications"
-                    onUploadSuccess={async (url) => {
-                      await profileService.updateProfile(profile.user_id, { certifications_url: url });
-                      setCertificationsUrl(url);
-                    }}
-                    onDeleteSuccess={async () => {
-                      await profileService.updateProfile(profile.user_id, { certifications_url: null });
-                      setCertificationsUrl(null);
-                    }}
-                  />
-                </div>
-              )}
-
-              {(profile?.role === 'investor' || profile?.role === 'admin') && (
-                <div className="space-y-6 pt-6 border-t border-white/5">
-                  <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">Investor Documents</h3>
-                  
-                  <DocumentUpload
-                    label="Investor Profile / Deck"
-                    description="Upload your personal investor thesis or introductory deck."
-                    currentUrl={investorProfileUrl}
-                    bucketName="profile_documents"
-                    folderPath="investor_profiles"
-                    onUploadSuccess={async (url) => {
-                      await investorService.updateInvestorProfile(profile.user_id, { investor_profile_url: url });
-                      setInvestorProfileUrl(url);
-                    }}
-                    onDeleteSuccess={async () => {
-                      await investorService.updateInvestorProfile(profile.user_id, { investor_profile_url: null });
-                      setInvestorProfileUrl(null);
-                    }}
-                  />
-
-                  <DocumentUpload
-                    label="Portfolio Overview"
-                    description="Upload a summary of your current portfolio companies."
-                    currentUrl={portfolioOverviewUrl}
-                    bucketName="profile_documents"
-                    folderPath="portfolios"
-                    onUploadSuccess={async (url) => {
-                      await investorService.updateInvestorProfile(profile.user_id, { portfolio_overview_url: url });
-                      setPortfolioOverviewUrl(url);
-                    }}
-                    onDeleteSuccess={async () => {
-                      await investorService.updateInvestorProfile(profile.user_id, { portfolio_overview_url: null });
-                      setPortfolioOverviewUrl(null);
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Account Settings */}
           {activeSection === "account" && (
@@ -561,35 +473,6 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Appearance */}
-          {activeSection === "appearance" && (
-            <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-in fade-in">
-              <div>
-                <h2 className="text-xl font-bold text-white mb-1">Appearance</h2>
-                <p className="text-sm text-on-surface-variant">Customize how AlloySphere looks.</p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                  <div className="text-sm font-medium text-white mb-3">Theme</div>
-                  <div className="flex gap-3">
-                    <button className="flex-1 p-4 rounded-xl border-2 border-white/30 bg-black text-center transition-all">
-                      <span className="material-symbols-outlined text-white mb-1 block">dark_mode</span>
-                      <span className="text-xs font-medium text-white">Dark</span>
-                    </button>
-                    <button className="flex-1 p-4 rounded-xl border border-white/10 bg-white/5 text-center transition-all hover:border-white/20 opacity-50 cursor-not-allowed">
-                      <span className="material-symbols-outlined text-on-surface-variant mb-1 block">light_mode</span>
-                      <span className="text-xs font-medium text-on-surface-variant">Light</span>
-                    </button>
-                    <button className="flex-1 p-4 rounded-xl border border-white/10 bg-white/5 text-center transition-all hover:border-white/20 opacity-50 cursor-not-allowed">
-                      <span className="material-symbols-outlined text-on-surface-variant mb-1 block">monitor</span>
-                      <span className="text-xs font-medium text-on-surface-variant">System</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Danger Zone */}
           {activeSection === "danger" && (

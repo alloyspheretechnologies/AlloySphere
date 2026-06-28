@@ -63,7 +63,6 @@ export function MobileDrawer({ profile }: { profile: any }) {
         { title: "Network", items: [
           { icon: "dynamic_feed", label: "Community Feed", href: "/feed" },
           { icon: "account_balance_wallet", label: "Investors", href: "/investments" },
-          { icon: "insights", label: "Analytics", href: "/workspace/analytics" },
         ]},
       ];
     }

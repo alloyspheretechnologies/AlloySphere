@@ -43,7 +43,6 @@ export function SideNav() {
     { section: "Network", items: [
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
       { icon: "account_balance_wallet", label: "Investors", href: "/investments" },
-      { icon: "insights", label: "Analytics", href: "/workspace/analytics" },
     ]}
   ];
 
