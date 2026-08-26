@@ -58,7 +58,6 @@ export function MobileDrawer({ profile }: { profile: any }) {
           ...common,
           { icon: "rocket_launch", label: "Startup", href: "/startup" },
           { icon: "grid_view", label: "Workspace", href: "/workspace" },
-          ...(hasStartup ? [{ icon: "360", label: "Conference", href: "/workspace/conference" }] : []),
         ]},
         { title: "Network", items: [
           { icon: "dynamic_feed", label: "Community Feed", href: "/feed" },
@@ -73,7 +72,6 @@ export function MobileDrawer({ profile }: { profile: any }) {
           ...common,
           { icon: "account_balance_wallet", label: "Portfolio", href: "/investments" },
           { icon: "dynamic_feed", label: "Community Feed", href: "/feed" },
-          ...(hasStartup ? [{ icon: "360", label: "Conference", href: "/workspace/conference" }] : []),
         ]},
       ];
     }
@@ -84,7 +82,6 @@ export function MobileDrawer({ profile }: { profile: any }) {
         ...common,
         { icon: "work", label: "Opportunities", href: "/jobs" },
         { icon: "description", label: "Applications", href: "/applications" },
-        ...(hasStartup ? [{ icon: "360", label: "Conference", href: "/workspace/conference" }] : []),
       ]},
       { title: "Network", items: [
         { icon: "dynamic_feed", label: "Community Feed", href: "/feed" },

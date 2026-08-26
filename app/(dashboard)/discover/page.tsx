@@ -9,10 +9,16 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 export default function DiscoverPage() {
   const [startups, setStartups] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterStage, setFilterStage] = useState("all");
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => { loadData(); }, []);
 
@@ -52,7 +58,7 @@ export default function DiscoverPage() {
   };
 
   const filtered = startups.filter((s) => {
-    const matchesSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || s.industry?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = !debouncedSearch || s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || s.industry?.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchesStage = filterStage === "all" || s.stage === filterStage;
     return matchesSearch && matchesStage;
   });

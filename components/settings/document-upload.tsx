@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { documentService } from "@/lib/services/document.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface DocumentUploadProps {

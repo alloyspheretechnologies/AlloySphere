@@ -7,7 +7,6 @@ import { startupService } from "@/lib/services/startup.service";
 import { profileService } from "@/lib/services/profile.service";
 import { applicationService } from "@/lib/services/application.service";
 import { opportunityService } from "@/lib/services/opportunity.service";
-import { taskService } from "@/lib/services/task.service";
 import { workspaceService } from "@/lib/services/workspace.service";
 import { pitchRequestService } from "@/lib/services/pitch-request.service";
 import { Modal } from "@/components/shared/modal";
@@ -15,15 +14,14 @@ import { ProfileLink } from "@/components/shared/profile-link";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const chartData = [
-  { name: "W1", tasks: 4 }, { name: "W2", tasks: 9 }, { name: "W3", tasks: 7 },
-  { name: "W4", tasks: 14 }, { name: "W5", tasks: 18 }, { name: "W6", tasks: 22 },
+  { name: "W1", activity: 4 }, { name: "W2", activity: 9 }, { name: "W3", activity: 7 },
+  { name: "W4", activity: 14 }, { name: "W5", activity: 18 }, { name: "W6", activity: 22 },
 ];
 
 export default function FounderView() {
   const router = useRouter();
   const [startup, setStartup] = useState<any>(null);
   const [workspace, setWorkspace] = useState<any>(null);
-  const [tasks, setTasks] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [pitchRequests, setPitchRequests] = useState<any[]>([]);
@@ -53,11 +51,6 @@ export default function FounderView() {
         setStartup(myStartup);
         const { data: ws } = await workspaceService.getWorkspaceByStartup(myStartup.id);
         setWorkspace(ws);
-
-        if (ws) {
-          const { data: taskData } = await taskService.listTasks(ws.id, { pageSize: 5 });
-          setTasks(taskData || []);
-        }
 
         const { data: apps } = await applicationService.getStartupApplications(myStartup.id, { pageSize: 10 });
         setApplications(apps || []);
@@ -165,7 +158,6 @@ export default function FounderView() {
     );
   }
 
-  const completedTasks = tasks.filter((t: any) => t.status === "done").length;
   const pendingApps = applications.filter((a: any) => a.status === "applied" || a.status === "reviewing").length;
 
   return (
@@ -192,11 +184,7 @@ export default function FounderView() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 pt-6 border-t border-white/5">
-            <div>
-              <div className="text-xs text-on-surface-variant uppercase mb-1">Tasks</div>
-              <div className="text-xl md:text-2xl font-bold text-white">{completedTasks}/{tasks.length || 0}</div>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 pt-6 border-t border-white/5">
             <div>
               <div className="text-xs text-on-surface-variant uppercase mb-1">Open Roles</div>
               <div className="text-xl md:text-2xl font-bold text-white">{opportunities.length}</div>
@@ -231,7 +219,7 @@ export default function FounderView() {
                 <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
                 <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={{ backgroundColor: "#111", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }} />
-                <Area type="monotone" dataKey="tasks" stroke="#ffffff" strokeWidth={2} fill="url(#fvGrad)" />
+                <Area type="monotone" dataKey="activity" stroke="#ffffff" strokeWidth={2} fill="url(#fvGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -241,11 +229,7 @@ export default function FounderView() {
       {/* Side Column */}
       <div className="lg:col-span-4 flex flex-col gap-6">
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/workspace/tasks" className="glass-panel p-4 rounded-xl border border-white/10 hover:border-white/30 text-center transition-all holographic-lift">
-            <span className="material-symbols-outlined text-white mb-2 block">add_task</span>
-            <div className="text-sm font-semibold">Tasks</div>
-          </Link>
+        <div className="grid grid-cols-3 gap-3">
           <Link href="/workspace/recruitment" className="glass-panel p-4 rounded-xl border border-white/10 hover:border-white/30 text-center transition-all holographic-lift">
             <span className="material-symbols-outlined text-white mb-2 block">campaign</span>
             <div className="text-sm font-semibold">Recruit</div>
@@ -253,10 +237,6 @@ export default function FounderView() {
           <Link href="/workspace/team" className="glass-panel p-4 rounded-xl border border-white/10 hover:border-white/30 text-center transition-all holographic-lift">
             <span className="material-symbols-outlined text-white mb-2 block">group_add</span>
             <div className="text-sm font-semibold">Team</div>
-          </Link>
-          <Link href="/workspace/analytics" className="glass-panel p-4 rounded-xl border border-white/10 hover:border-white/30 text-center transition-all holographic-lift">
-            <span className="material-symbols-outlined text-white mb-2 block">monitoring</span>
-            <div className="text-sm font-semibold">Analytics</div>
           </Link>
         </div>
 

@@ -37,7 +37,7 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Protected routes — redirect to login if not authenticated
-  const protectedPaths = ['/dashboard', '/home', '/workspace', '/onboarding', '/profile', '/discover', '/jobs', '/investments', '/feed', '/applications', '/settings', '/startup'];
+  const protectedPaths = ['/home', '/workspace', '/onboarding', '/profile', '/discover', '/jobs', '/investments', '/feed', '/applications', '/settings', '/startup'];
   const isProtected = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
 
   if (isProtected && !user) {
@@ -58,7 +58,7 @@ export async function updateSession(request: NextRequest) {
 
       if (profile?.onboarding_complete) {
         const url = request.nextUrl.clone();
-        url.pathname = '/dashboard';
+        url.pathname = '/home';
         return NextResponse.redirect(url);
       }
 

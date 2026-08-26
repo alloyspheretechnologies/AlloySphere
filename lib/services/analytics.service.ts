@@ -14,19 +14,12 @@ export type AnalyticsEvent =
   | 'startup_followed' 
   | 'startup_shared'
   // Investor
-  | 'investor_profile_viewed' 
-  | 'data_room_requested' 
-  | 'data_room_granted' 
+  | 'investor_profile_viewed'
   | 'pitch_deck_viewed'
   // Talent
   | 'resume_uploaded' 
   | 'portfolio_uploaded' 
   | 'profile_viewed'
-  // Conference
-  | 'conference_created' 
-  | 'conference_joined' 
-  | 'conference_left' 
-  | 'document_shared'
   // Collaboration
   | 'collaboration_request_sent' 
   | 'collaboration_request_accepted';

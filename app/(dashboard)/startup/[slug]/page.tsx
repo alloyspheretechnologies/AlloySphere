@@ -6,10 +6,8 @@ import Link from "next/link";
 import { startupService } from "@/lib/services/startup.service";
 import { opportunityService } from "@/lib/services/opportunity.service";
 import { profileService } from "@/lib/services/profile.service";
-import { projectService } from "@/lib/services/project.service";
 import { workspaceService } from "@/lib/services/workspace.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { roadmapService } from "@/lib/services/roadmap.service";
 import { realtimeService } from "@/lib/services/realtime.service";
 import { pitchRequestService } from "@/lib/services/pitch-request.service";
 import { ProfileLink } from "@/components/shared/profile-link";
@@ -21,9 +19,7 @@ export default function StartupProfilePage() {
   const [startup, setStartup] = useState<any>(null);
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
-  const [milestones, setMilestones] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
-  const [roadmaps, setRoadmaps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -56,23 +52,6 @@ export default function StartupProfilePage() {
       ]);
       setMembers(membersRes.data || []);
       setOpportunities(oppsRes.data || []);
-
-      // Load milestones & roadmaps from workspace
-      const { data: ws } = await workspaceService.getWorkspaceByStartup(s.id);
-      if (ws) {
-        const { data: projects } = await projectService.listProjects(ws.id);
-        const allMs: any[] = [];
-        for (const p of (projects || []).slice(0, 3)) {
-          const { data: ms } = await projectService.listMilestones(p.id);
-          allMs.push(...(ms || []).map((m: any) => ({ ...m, projectName: p.name })));
-        }
-        setMilestones(allMs);
-
-        // Fetch roadmaps
-        const { data: rmData } = await roadmapService.getRoadmaps(ws.id);
-        // Expose public roadmaps
-        setRoadmaps((rmData || []).filter(r => r.visibility === 'public'));
-      }
 
       // Load posts
       const supabase = getSupabaseBrowserClient();
@@ -184,7 +163,7 @@ export default function StartupProfilePage() {
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" /></div>;
   if (!startup) return <div className="text-center py-20 text-on-surface-variant">Startup not found</div>;
 
-  const tabs = ["overview", "roadmap", "team", "opportunities", "updates"];
+  const tabs = ["overview", "team", "opportunities", "updates"];
 
   return (
     <div className="w-full max-w-[1200px] mx-auto animate-in fade-in pb-12">
@@ -274,70 +253,6 @@ export default function StartupProfilePage() {
               </a>
             </div>
           )}
-          {milestones.length > 0 && (
-            <div className="glass-panel p-6 rounded-2xl border border-white/10">
-              <h3 className="font-bold text-white mb-4">Milestones</h3>
-              <div className="space-y-3">
-                {milestones.slice(0, 5).map((ms: any) => (
-                  <div key={ms.id} className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${ms.status === "completed" ? "bg-emerald-400" : ms.status === "in_progress" ? "bg-amber-400" : "bg-white/20"}`} />
-                    <div>
-                      <div className="text-sm text-white">{ms.title}</div>
-                      <div className="text-xs text-on-surface-variant">{ms.projectName} {ms.target_date ? `• ${new Date(ms.target_date).toLocaleDateString()}` : ""}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === "roadmap" && (
-        <div className="space-y-6 animate-in fade-in">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold text-white">Public Roadmap</h3>
-              <p className="text-sm text-on-surface-variant mt-1">Track our execution and upcoming milestones.</p>
-            </div>
-            <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Tracking
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-            {roadmaps.length > 0 ? roadmaps.map(r => (
-              <div key={r.id} className="glass-panel p-6 rounded-2xl border border-white/10">
-                <div className="flex justify-between items-start mb-4">
-                  <h4 className="text-lg font-bold text-white">{r.title}</h4>
-                  <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${
-                    r.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400' :
-                    r.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
-                    r.status === 'at_risk' ? 'bg-red-500/20 text-red-400' :
-                    'bg-white/10 text-white/70'
-                  }`}>{r.status.replace('_', ' ')}</span>
-                </div>
-                <p className="text-sm text-on-surface-variant mb-6">{r.description}</p>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-xs text-on-surface-variant mb-1">
-                      <span>Progress</span>
-                      <span>{roadmapService.calculateProgress(r.milestones || [])}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: `${roadmapService.calculateProgress(r.milestones || [])}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )) : (
-              <div className="col-span-full glass-panel p-12 rounded-2xl border border-white/10 text-center">
-                <span className="material-symbols-outlined text-[48px] text-on-surface-variant mb-4 block">lock</span>
-                <h3 className="text-lg font-bold text-white mb-2">No public roadmaps</h3>
-                <p className="text-sm text-on-surface-variant">This startup has not published any public roadmaps yet.</p>
-              </div>
-            )}
-          </div>
         </div>
       )}
 

@@ -38,7 +38,6 @@ export function SideNav() {
       { icon: "rocket_launch", label: "Startup", href: "/startup" },
       { icon: "grid_view", label: "Workspace", href: "/workspace", isFill: true },
       { icon: "handshake", label: "Pitch Requests", href: "/pitch-requests" },
-      { icon: "360", label: "Conference", href: "/workspace/conference", isFill: true },
     ]},
     { section: "Network", items: [
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
@@ -52,7 +51,6 @@ export function SideNav() {
       { icon: "explore", label: "Discover Startups", href: "/discover" },
       { icon: "work", label: "Opportunities", href: "/jobs" },
       { icon: "description", label: "Applications", href: "/applications" },
-      ...(hasStartup ? [{ icon: "360", label: "Conference", href: "/workspace/conference", isFill: true }] : []),
     ]},
     { section: "Network", items: [
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
@@ -66,7 +64,6 @@ export function SideNav() {
       { icon: "account_balance_wallet", label: "Portfolio", href: "/investments" },
       { icon: "handshake", label: "Pitch Requests", href: "/pitch-requests" },
       { icon: "dynamic_feed", label: "Community", href: "/feed" },
-      ...(hasStartup ? [{ icon: "360", label: "Conference", href: "/workspace/conference", isFill: true }] : []),
     ]}
   ];
 

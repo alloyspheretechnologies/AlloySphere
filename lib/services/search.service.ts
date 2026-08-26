@@ -84,35 +84,4 @@ export const searchService = {
     return { data: data ?? [], error };
   },
 
-  /**
-   * Search tasks within a workspace
-   */
-  async searchTasks(workspaceId: string, query: string) {
-    const supabase = getSupabaseBrowserClient();
-    const q = sanitizeSearchInput(query);
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*, assignee:profiles!tasks_assignee_id_fkey(id, name, avatar_url)')
-      .eq('workspace_id', workspaceId)
-      .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
-      .limit(30);
-
-    return { data: data ?? [], error };
-  },
-
-  /**
-   * Search documents within a workspace
-   */
-  async searchDocuments(workspaceId: string, query: string) {
-    const supabase = getSupabaseBrowserClient();
-    const q = sanitizeSearchInput(query);
-    const { data, error } = await supabase
-      .from('documents')
-      .select('*')
-      .eq('workspace_id', workspaceId)
-      .ilike('name', `%${q}%`)
-      .limit(30);
-
-    return { data: data ?? [], error };
-  },
 };

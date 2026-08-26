@@ -56,12 +56,8 @@ export default function ProfilePage() {
         .select("*", { count: "exact", head: true })
         .eq("user_a_id", prof.id);
 
-      // Contribution score (completed tasks)
-      const { count: taskCount } = await supabase
-        .from("tasks")
-        .select("*", { count: "exact", head: true })
-        .eq("assignee_id", prof.id)
-        .eq("status", "done");
+      // Contribution score (completed tasks) feature removed
+      const taskCount = 0;
 
       setStats({
         followers: followerCount || 0,

@@ -8,7 +8,6 @@ import { startupService } from "@/lib/services/startup.service";
 import { applicationService } from "@/lib/services/application.service";
 import { opportunityService } from "@/lib/services/opportunity.service";
 import { workspaceService } from "@/lib/services/workspace.service";
-import { taskService } from "@/lib/services/task.service";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 import HomeEcosystemStats from "@/components/home/home-ecosystem-stats";
@@ -73,13 +72,11 @@ export default function HomePage() {
         { count: startupCount },
         { count: memberCount },
         { count: investorCount },
-        { count: projectCount },
         { count: opportunityCount },
       ] = await Promise.all([
         supabase.from("startups").select("*", { count: "exact", head: true }).eq("status", "active"),
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "investor"),
-        supabase.from("projects").select("*", { count: "exact", head: true }).neq("status", "cancelled"),
         supabase.from("opportunities").select("*", { count: "exact", head: true }).eq("status", "open"),
       ]);
 
@@ -93,7 +90,7 @@ export default function HomePage() {
         totalStartups: startupCount || 0,
         totalMembers: memberCount || 0,
         totalInvestors: investorCount || 0,
-        activeProjects: projectCount || 0,
+        activeProjects: 0,
         applicationsThisWeek: appWeekCount || 0,
         totalOpportunities: opportunityCount || 0,
       });
@@ -157,21 +154,16 @@ export default function HomePage() {
       if (myStartup) {
         const { data: apps } = await applicationService.getStartupApplications(myStartup.id, { pageSize: 50 });
         const { data: opps } = await opportunityService.listOpportunities({ startupId: myStartup.id });
-        const { data: ws } = await workspaceService.getWorkspaceByStartup(myStartup.id);
-        let tasks: any[] = [];
-        if (ws) {
-          const { data: taskData } = await taskService.listTasks(ws.id, { pageSize: 50 });
-          tasks = taskData || [];
-        }
+        
         const pendingApps = (apps || []).filter((a: any) => a.status === "applied" || a.status === "reviewing").length;
-        const completedTasks = tasks.filter((t: any) => t.status === "done").length;
+        
         setFounderData({
           startupName: myStartup.name,
           applicationsReceived: apps?.length || 0,
           pendingApplications: pendingApps,
           openRoles: opps?.length || 0,
-          completedTasks,
-          totalTasks: tasks.length,
+          completedTasks: 0,
+          totalTasks: 0,
         });
       }
     }
@@ -179,9 +171,7 @@ export default function HomePage() {
     if (role === "talent") {
       const { data: apps } = await applicationService.getMyApplications(prof.id, { pageSize: 50 });
       const { data: opps } = await opportunityService.listOpportunities({ pageSize: 3 });
-      const { count: taskCount } = await supabase
-        .from("tasks").select("*", { count: "exact", head: true })
-        .eq("assignee_id", prof.id).eq("status", "done");
+      const taskCount = 0; // Tasks feature removed
 
       setTalentData({
         totalApplications: apps?.length || 0,
